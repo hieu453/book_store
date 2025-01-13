@@ -40,9 +40,9 @@
                                 </div>
                             </div>
                             <Link v-for="(item, index) in navigation" :key="item.name" :href="item.href"
-                                :class="[item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'rounded-md px-3 py-2 text-sm font-medium']"
+                                :class="[isUrl(item.name.toLowerCase()) ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'rounded-md px-3 py-2 text-sm font-medium']"
                                 :aria-current="item.current ? 'page' : undefined"
-                                @click="changeCurrent(index)">
+                            >
                                 {{ item.name }}
                             </Link>
                         </div>
@@ -152,11 +152,24 @@ const navigation = ref([
     { name: 'Products', href: route('products'), current: false },
 ]);
 
+// let navs = JSON.parse(localStorage.getItem('navigation')) ?? navigation.value;
+
 const categories = computed(() => page.props.categories);
 
-function changeCurrent(index) {
-    navigation.value.forEach((item, itemIndex) => {
-        itemIndex == index ? item.current = true : item.current = false;
-    });
+// function changeCurrent(index) {
+//     navigation.value.forEach((item, itemIndex) => {
+//         itemIndex == index ? item.current = true : item.current = false;
+//     });
+
+//     localStorage.setItem('navigation', JSON.stringify(navigation.value));
+//     navs = JSON.parse(localStorage.getItem('navigation'));
+// }
+
+function isUrl(...urls) {
+    let currentUrl = page.url.substring(1)
+    if (urls[0] === 'home') {
+        return currentUrl === ''
+    }
+    return urls.filter((url) => currentUrl.startsWith(url)).length
 }
 </script>
