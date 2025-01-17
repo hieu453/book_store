@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,8 +17,10 @@ class ProductFactory extends Factory
      */
     public function definition(): array
     {
+        $name = ucfirst(fake()->word());
         return [
-            'name' => ucfirst(fake()->word()),
+            'name' => $name,
+            'slug' => Str::slug($name),
             'width' => fake()->randomNumber(2, false),
             'height' => fake()->randomNumber(2, false),
             'language' => ucfirst(fake()->word()),

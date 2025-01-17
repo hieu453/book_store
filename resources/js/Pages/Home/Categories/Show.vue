@@ -113,12 +113,18 @@ import { ref } from 'vue';
 const props = defineProps({
     'products': {
         type: Object,
+    },
+    'category_name': {
+        type: String,
     }
 })
 
 const breadCrumb = ref([
     {
-        label: 'Products',
+        label: 'Categories',
+    },
+    {
+        label: props.category_name,
     }
 ])
 

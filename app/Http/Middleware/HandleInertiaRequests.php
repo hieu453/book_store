@@ -36,6 +36,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'categories' => Category::all(),
+            'cartNumber' => session('cartNumber'),
         ];
     }
 }
