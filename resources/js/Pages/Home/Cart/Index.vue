@@ -1,6 +1,6 @@
 <template>
-    <Head title="Cart" />
     <section class="bg-white py-8 antialiased dark:bg-gray-900 md:py-8">
+        <Head title="Cart" />
         <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
             <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">Shopping Cart</h2>
 
@@ -13,7 +13,7 @@
                             </div>
                         </div>
                     </div>
-                    <template v-if="cart">
+                    <template v-if="Object.keys(cart).length">
                         <div v-for="( item, itemId ) in cart" class="space-y-6">
                             <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:p-6">
                                 <div class="space-y-4 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0">
@@ -34,8 +34,9 @@
                                         <div class="flex items-center">
                                             <!-- Decrease button -->
                                             <button type="button" id="decrement-button-2"
-                                                @click="decreaseQuantity(itemId)"
+                                                @click.prevent="decreaseQuantity(itemId)"
                                                 data-input-counter-decrement="counter-input-2"
+                                                :class="{ 'bg-gray-50 hover:bg-gray-50 hover:cursor-not-allowed': item.quantity == 1 }"
                                                 class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
                                                 <svg class="h-2.5 w-2.5 text-gray-900 dark:text-white" aria-hidden="true"
                                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
@@ -49,7 +50,7 @@
                                                 placeholder="" :value="item.quantity" required />
                                             <!-- Increase button -->
                                             <button type="button" id="increment-button-2"
-                                                @click="increaseQuantity(itemId)"
+                                                @click.prevent="increaseQuantity(itemId)"
                                                 data-input-counter-increment="counter-input-2"
                                                 class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
                                                 <svg class="h-2.5 w-2.5 text-gray-900 dark:text-white" aria-hidden="true"
@@ -60,7 +61,7 @@
                                             </button>
                                         </div>
                                         <div class="text-end md:order-4 md:w-32">
-                                            <p class="text-base font-bold text-gray-900 dark:text-white">${{ item.price }}</p>
+                                            <p class="text-base font-bold text-gray-900 dark:text-white">${{ (item.price * item.quantity).toFixed(2) }}</p>
                                         </div>
                                     </div>
 
@@ -82,6 +83,7 @@
                                             </button>
 
                                             <button type="button"
+                                                @click="removeItem(itemId)"
                                                 class="inline-flex items-center text-sm font-medium text-red-600 hover:underline dark:text-red-500">
                                                 <svg class="me-1.5 h-5 w-5" aria-hidden="true"
                                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
@@ -109,7 +111,7 @@
                         <p class="text-xl font-semibold text-gray-900 dark:text-white">Order summary</p>
 
                         <div class="space-y-4">
-                            <div class="space-y-2">
+                            <!-- <div class="space-y-2">
                                 <dl class="flex items-center justify-between gap-4">
                                     <dt class="text-base font-normal text-gray-500 dark:text-gray-400">Original price
                                     </dt>
@@ -130,18 +132,21 @@
                                     <dt class="text-base font-normal text-gray-500 dark:text-gray-400">Tax</dt>
                                     <dd class="text-base font-medium text-gray-900 dark:text-white">$799</dd>
                                 </dl>
-                            </div>
+                            </div> -->
 
                             <dl
                                 class="flex items-center justify-between gap-4 border-t border-gray-200 pt-2 dark:border-gray-700">
                                 <dt class="text-base font-bold text-gray-900 dark:text-white">Total</dt>
-                                <dd class="text-base font-bold text-gray-900 dark:text-white">$8,191.00</dd>
+                                <dd class="text-base font-bold text-gray-900 dark:text-white">${{ totalPrice.toFixed(2) }}</dd>
                             </dl>
                         </div>
 
-                        <a href="#"
-                            class="flex w-full items-center justify-center rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-purple-700 focus:outline-none dark:bg-blue-600 dark:hover:bg-blue-700">Proceed
-                            to Checkout</a>
+                        <button
+                            @click="processToCheckout"
+                            class="flex w-full items-center justify-center rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-purple-700 focus:outline-none dark:bg-blue-600 dark:hover:bg-blue-700"
+                        >
+                            Proceed to Checkout
+                        </button>
 
                         <div class="flex items-center justify-center gap-2">
                             <span class="text-sm font-normal text-gray-500 dark:text-gray-400"> or </span>
@@ -157,7 +162,7 @@
                         </div>
                     </div>
 
-                    <div
+                    <!-- <div
                         class="space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-6">
                         <form class="space-y-4">
                             <div>
@@ -172,7 +177,7 @@
                                 class="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Apply
                                 Code</button>
                         </form>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -180,24 +185,48 @@
 </template>
 
 <script setup>
-import { Head } from '@inertiajs/vue3';
+import { Head, router, usePage, Link } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+import { cartNumberStore } from '@/store/cartNumberStore';
 
-const props = defineProps({
-    'cart': {
-        type: Object,
+const cart = ref(JSON.parse(localStorage.getItem('cart')) ?? {})
+
+const totalPrice = computed(() => {
+    if (cart.value) {
+        return Object.values(cart.value).reduce((acc, item) => {
+            return acc + (item.price * item.quantity)
+        }, 0)
     }
+
+    return 0;
 })
 
-console.log(props.cart)
-
 function increaseQuantity(itemId) {
-    props.cart[itemId].quantity += 1;
+    cart.value[itemId].quantity += 1;
+    localStorage.setItem('cart', JSON.stringify(cart.value))
+    cart.value = JSON.parse(localStorage.getItem('cart'))
+    cartNumberStore.update();
 }
 
 function decreaseQuantity(itemId) {
-    if (props.cart[itemId].quantity == 0) {
+    if (cart.value[itemId].quantity == 1) {
         return;
     }
-    props.cart[itemId].quantity -= 1;
+
+    cart.value[itemId].quantity -= 1
+    localStorage.setItem('cart', JSON.stringify(cart.value))
+    cart.value = JSON.parse(localStorage.getItem('cart'))
+    cartNumberStore.update();
+}
+
+function removeItem(itemId) {
+    delete cart.value[itemId]
+    localStorage.setItem('cart', JSON.stringify(cart.value))
+    cart.value = JSON.parse(localStorage.getItem('cart'))
+    cartNumberStore.update();
+}
+
+function processToCheckout() {
+    router.get(route('cart.checkout'))
 }
 </script>

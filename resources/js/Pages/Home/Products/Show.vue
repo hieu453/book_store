@@ -1,6 +1,6 @@
 <template>
-    <Head :title="product.name" />
     <div class="bg-gray-100">
+        <Head :title="product.name" />
         <div class="container mx-auto px-4 py-8">
             <Breadcrumb :data="breadCrumb" />
             <div class="flex flex-wrap -mx-4 mt-4">
@@ -126,9 +126,10 @@ import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { onMounted, ref, useTemplateRef } from 'vue';
+import { cartNumberStore } from '@/store/cartNumberStore';
 
 const props = defineProps({
-    'product': {
+    product: {
         type: Object,
     }
 })
@@ -147,6 +148,7 @@ const disabled = ref(false)
 const toast = useToast()
 const quantityInput = useTemplateRef('quantity-input')
 const productCart = ref({
+    productId: props.product.id,
     name: props.product.name,
     quantity: 1,
     price: props.product.price,
@@ -154,24 +156,22 @@ const productCart = ref({
 
 onMounted(() => {
     quantityInput.value.onchange = function (e) {
-        product.value.quantity = parseInt(this.value);
+        productCart.value.quantity = parseInt(this.value);
     }
 })
 
 function addToCart() {
-    disabled.value = true
-    router.post(route('cart.add'),
-        {
-            productId: props.product.id,
-            product: productCart.value,
-        },
-        {
-            preserveScroll: true,
-            onSuccess: function () {
-                disabled.value = false
-                toast.add({ severity: 'success', summary: 'Success', detail: 'Cart added', life: 2000 })
-            }
-        })
+    const cart = JSON.parse(localStorage.getItem('cart')) ?? {};
+
+    if ( cart[props.product.id] ) {
+        cart[props.product.id]['quantity'] += productCart.value.quantity;
+    } else {
+        cart[props.product.id] = productCart.value;
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    toast.add({ severity: 'success', summary: 'Success', detail: 'Cart added', life: 2000 })
+    cartNumberStore.update();
 }
 
 </script>

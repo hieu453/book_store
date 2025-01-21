@@ -15,10 +15,10 @@ class ProductController extends Controller
         ]);
     }
 
-    public function show(Request $request)
+    public function show($slug, $id)
     {
         return Inertia::render('Home/Products/Show', [
-            'product' => Product::with('category')->where('id', $request->id)->first(),
+            'product' => Product::with('category')->where('id', $id)->first(),
         ]);
     }
 }

@@ -1,6 +1,6 @@
 <template>
-    <Head title="Products" />
     <div class="container px-4 py-8 mx-auto">
+        <Head title="Products" />
         <Breadcrumb :data="breadCrumb" />
         <WhenVisible data="permissions" :buffer="500">
             <template #fallback>
@@ -74,8 +74,10 @@
                                         <template #footer>
                                             <div class="flex gap-2 mt-1 items-center">
                                                 <Link
-                                                    :href="route('product.show', { slug: product.slug })"
-                                                    :data="{ id: product.id }"
+                                                    :href="route('product.show', {
+                                                        slug: product.slug,
+                                                        id: product.id,
+                                                    })"
                                                     class="w-full btn bg-purple-800 hover:bg-purple-600">
                                                     View
                                                 </Link>

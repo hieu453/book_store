@@ -64,10 +64,10 @@
                             <span class="sr-only">View notifications</span>
                             <ShoppingCartIcon class="size-6" aria-hidden="true" />
                             <div
-                                v-if="cartNumber"
+                                v-if="cartNumberStore.cartNumber"
                                 class="rounded-full absolute -top-3 left-4 text-xs bg-red-500 px-2 py-0.5 text-white"
                             >
-                                {{ cartNumber }}
+                                {{ cartNumberStore.cartNumber }}
                             </div>
                         </Link>
                         <button type="button"
@@ -161,6 +161,7 @@ import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuIt
 import { Bars3Icon, BellIcon, XMarkIcon, ShoppingCartIcon } from '@heroicons/vue/24/outline'
 import { Link, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
+import { cartNumberStore } from '@/store/cartNumberStore'
 
 const page = usePage();
 
@@ -170,7 +171,11 @@ const navigation = ref([
 ]);
 
 const categories = computed(() => page.props.categories);
-const cartNumber = computed(() => page.props.cartNumber);
+// const cartNumber = computed(() => {
+//     return Object.values(JSON.parse(localStorage.getItem('cart'))).reduce((totalQuantity, item) => {
+//         return totalQuantity + item.quantity
+//     }, 0)
+// });
 
 function isUrl(...urls) {
     let currentUrl = page.url.substring(1)

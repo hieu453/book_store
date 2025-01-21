@@ -1,6 +1,6 @@
 <template>
-    <Head title="Products" />
     <div class="container px-4 py-8 mx-auto">
+        <Head title="Products" />
         <Breadcrumb :data="breadCrumb" />
         <WhenVisible data="permissions" :buffer="500">
             <template #fallback>

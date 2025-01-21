@@ -34,11 +34,11 @@ Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('categ
 
 // Product routes
 Route::get('/products', [ProductController::class, 'index'])->name('products');
-Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
+Route::get('/product/{slug}/{id}', [ProductController::class, 'show'])->name('product.show');
 
 // Cart routes
 Route::get('/cart', [CartController::class, 'index'])->name('cart');
-Route::post('/add-to-cart', [CartController::class, 'add'])->name('cart.add');
+Route::get('/cart/checkout', [CartController::class, 'showCheckout'])->name('cart.checkout');
 
 // Dashboard and Profile
 Route::get('/dashboard', function () {
