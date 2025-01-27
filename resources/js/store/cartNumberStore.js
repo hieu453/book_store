@@ -1,12 +1,8 @@
 import { reactive } from "vue";
 
 export const cartNumberStore = reactive({
-    cartNumber: Object.values(JSON.parse(localStorage.getItem('cart')) ?? {}).reduce((totalQuantity, item) => {
-        return totalQuantity + item.quantity
-    }, 0),
+    // cartNumber: page.props.cartNumber,
     update() {
-        this.cartNumber = Object.values(JSON.parse(localStorage.getItem('cart'))).reduce((totalQuantity, item) => {
-            return totalQuantity + item.quantity
-        }, 0)
+        this.cartNumber = page.props.cartNumber;
     }
 })

@@ -2,9 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Cart;
+use Inertia\Middleware;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -33,9 +34,10 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user() ?? null,
             ],
             'categories' => Category::all(),
+            'cartNumber' => $request->user() ? Cart::where('user_id', $request->user()->id)->sum('quantity') : null,
         ];
     }
 }

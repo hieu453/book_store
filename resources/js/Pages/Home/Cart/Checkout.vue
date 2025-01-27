@@ -474,7 +474,7 @@
                     </div>
 
                     <div class="space-y-3">
-                        <button type="submit" class="flex w-full items-center justify-center rounded-lg bg-purple-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-purple-800 focus:outline-none focus:ring-4  focus:ring-primary-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        <button @click="processToPayment" type="submit" class="flex w-full items-center justify-center rounded-lg bg-purple-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-purple-800 focus:outline-none focus:ring-4  focus:ring-primary-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                             Proceed to Payment
                         </button>
                     </div>
@@ -485,7 +485,7 @@
 </template>
 
 <script setup>
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { computed, onMounted, ref, useTemplateRef } from 'vue';
 
 const cart = ref(JSON.parse(localStorage.getItem('cart')) ?? {})
@@ -521,4 +521,8 @@ onMounted(() => {
     })
 
 })
+
+function processToPayment() {
+    router.get('/charge-checkout')
+}
 </script>

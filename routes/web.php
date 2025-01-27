@@ -26,6 +26,38 @@ Route::get('/session-flush', function () {
     return redirect()->back();
 });
 
+Route::get('/checkout', function (Request $request) {
+    $stripePriceId = 'price_1Qk4JHCAJbhs7QYLNSc2OPJM';
+    $stripePriceId2 = 'price_1QkHH2CAJbhs7QYL4qjhmSDI';
+
+    $quantity = 1;
+
+    return $request->user()->checkout([
+        $stripePriceId => $quantity,
+        $stripePriceId2 => $quantity,
+    ], [
+        'success_url' => route('checkout-success'),
+        'cancel_url' => route('checkout-cancel'),
+    ]);
+})->name('checkout');
+
+Route::get('/charge-checkout', function (Request $request) {
+
+    return Inertia::render('Payment');
+});
+
+Route::post('/purchase', function (Request $request) {
+    // dd($request->paymentMethodId);
+    $stripeCharge = $request->user()->charge(
+        100, $request->paymentMethodId, [
+            'return_url' => route('checkout-success'),
+        ]
+    );
+});
+
+Route::inertia('/checkout/success', 'Success')->name('checkout-success');
+Route::inertia('/checkout/cancel', 'Cancel')->name('checkout-cancel');
+
 // Home routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -37,8 +69,16 @@ Route::get('/products', [ProductController::class, 'index'])->name('products');
 Route::get('/product/{slug}/{id}', [ProductController::class, 'show'])->name('product.show');
 
 // Cart routes
-Route::get('/cart', [CartController::class, 'index'])->name('cart');
-Route::get('/cart/checkout', [CartController::class, 'showCheckout'])->name('cart.checkout');
+Route::middleware('auth')->group(function () {
+    Route::get('/cart', [CartController::class, 'index'])->name('cart');
+    Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
+    Route::post('/cart/increase', [CartController::class, 'increaseQuantity'])->name('cart.increase');
+    Route::post('/cart/decrease', [CartController::class, 'decreaseQuantity'])->name('cart.decrease');
+    Route::get('/cart/cart-number', [CartController::class, 'getCartNumber'])->name('cart.number');
+    Route::get('/cart/checkout', [CartController::class, 'showCheckout'])->name('cart.checkout');
+    Route::post('/cart/delete', [CartController::class, 'deleteCartItems'])->name('cart.delete.items');
+    Route::delete('/cart/remove/{id}', [CartController::class, 'removeItem'])->name('cart.remove.item');
+});
 
 // Dashboard and Profile
 Route::get('/dashboard', function () {

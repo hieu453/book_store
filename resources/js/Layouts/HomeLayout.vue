@@ -63,11 +63,19 @@
                             <span class="absolute -inset-1.5" />
                             <span class="sr-only">View notifications</span>
                             <ShoppingCartIcon class="size-6" aria-hidden="true" />
-                            <div
-                                v-if="cartNumberStore.cartNumber"
-                                class="rounded-full absolute -top-3 left-4 text-xs bg-red-500 px-2 py-0.5 text-white"
-                            >
-                                {{ cartNumberStore.cartNumber }}
+                            <div v-if="page.props.cartNumber">
+                                <div
+                                    v-if="cartNumber"
+                                    class="rounded-full absolute -top-3 left-4 text-xs bg-red-500 px-2 py-0.5 text-white"
+                                >
+                                    {{ cartNumber }}
+                                </div>
+                                <div
+                                    v-else
+                                    class="rounded-full absolute -top-3 left-4 text-xs bg-red-500 px-2 py-0.5 text-white"
+                                >
+                                    {{ page.props.cartNumber }}
+                                </div>
                             </div>
                         </Link>
                         <button type="button"
@@ -78,7 +86,7 @@
                         </button>
 
                         <!-- Profile dropdown -->
-                        <Menu as="div" class="relative ml-3">
+                        <Menu v-if="user" as="div" class="relative ml-3">
                             <div>
                                 <MenuButton
                                     class="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
@@ -98,21 +106,35 @@
                                 <MenuItems
                                     class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
                                     <MenuItem v-slot="{active}">
-                                    <a href="#"
-                                        :class="[active ? 'bg-gray-100 outline-none' : '', 'block px-4 py-2 text-sm text-gray-700']">Your
-                                        Profile</a>
+                                        <a
+                                            href="#"
+                                            :class="[active ? 'bg-gray-100 outline-none' : '', 'block px-4 py-2 text-sm text-gray-700']"
+                                        >
+                                            Your Profile
+                                        </a>
                                     </MenuItem>
                                     <MenuItem v-slot="{active}">
-                                    <a href="#"
-                                        :class="[active ? 'bg-gray-100 outline-none' : '', 'block px-4 py-2 text-sm text-gray-700']">Settings</a>
+                                        <a
+                                            href="#"
+                                            :class="[active ? 'bg-gray-100 outline-none' : '', 'block px-4 py-2 text-sm text-gray-700']"
+                                        >
+                                            Settings
+                                        </a>
                                     </MenuItem>
                                     <MenuItem v-slot="{active}">
-                                    <a href="#"
-                                        :class="[active ? 'bg-gray-100 outline-none' : '', 'block px-4 py-2 text-sm text-gray-700']">Sign
-                                        out</a>
+                                        <Link
+                                            :href="route('logout')"
+                                            method="post"
+                                            :class="[active ? 'bg-gray-100 outline-none' : '', 'block w-full text-left px-4 py-2 text-sm text-gray-700']"
+                                        >
+                                            Logout
+                                        </Link>
                                     </MenuItem>
                                 </MenuItems>
                             </transition>
+                        </Menu>
+                        <Menu v-else>
+                            <Link :href="route('login')" class="text-white">Sign in</Link>
                         </Menu>
                     </div>
                 </div>
@@ -161,9 +183,17 @@ import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuIt
 import { Bars3Icon, BellIcon, XMarkIcon, ShoppingCartIcon } from '@heroicons/vue/24/outline'
 import { Link, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { cartNumberStore } from '@/store/cartNumberStore'
 
 const page = usePage();
+
+const cartNumber = computed(() => {
+    if (page.props.cartItems) {
+        return page.props.cartItems.reduce((acc, item) => {
+            return acc + item.quantity
+        }, 0)
+    }
+    return null;
+})
 
 const navigation = ref([
     { name: 'Home', href: route('home'), current: true },
@@ -171,11 +201,7 @@ const navigation = ref([
 ]);
 
 const categories = computed(() => page.props.categories);
-// const cartNumber = computed(() => {
-//     return Object.values(JSON.parse(localStorage.getItem('cart'))).reduce((totalQuantity, item) => {
-//         return totalQuantity + item.quantity
-//     }, 0)
-// });
+const user = computed(() => page.props.auth.user);
 
 function isUrl(...urls) {
     let currentUrl = page.url.substring(1)

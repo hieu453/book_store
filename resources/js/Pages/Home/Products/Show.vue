@@ -30,10 +30,10 @@
 
                 <!-- Product Details -->
                 <div class="w-full md:w-1/2 px-4">
-                    <h2 class="text-3xl font-bold mb-2">{{ product.name }}</h2>
+                    <h2 class="text-3xl font-bold mb-2 dark:text-black">{{ product.name }}</h2>
                     <p class="text-gray-600 mb-4">{{ product.category.name }}</p>
                     <div class="mb-4">
-                        <span class="text-2xl font-bold mr-2">${{ product.price }}</span>
+                        <span class="text-2xl font-bold mr-2 dark:text-black">${{ product.price }}</span>
                         <!-- <span class="text-gray-500 line-through">$399.99</span> -->
                     </div>
                     <div class="flex items-center mb-4">
@@ -70,7 +70,7 @@
                         <span class="ml-2 text-gray-600">4.5 (120 reviews)</span>
                     </div>
                     <div class="mb-6">
-                        <h3 class="text-lg font-semibold mb-2">Information:</h3>
+                        <h3 class="text-lg font-semibold mb-2 dark:text-black">Information:</h3>
                         <ul class="list-disc list-inside text-gray-700">
                             <li>Author: {{ product.author }}</li>
                             <li>Size: {{ product.width }} x {{ product.height }}cm</li>
@@ -121,12 +121,12 @@
 </template>
 
 <script setup>
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
-import { onMounted, ref, useTemplateRef } from 'vue';
-import { cartNumberStore } from '@/store/cartNumberStore';
+import { computed, onMounted, ref, useTemplateRef } from 'vue';
+import axios from 'axios';
 
 const props = defineProps({
     product: {
@@ -134,6 +134,7 @@ const props = defineProps({
     }
 })
 
+const page = usePage();
 const breadCrumb = ref([
     {
         label: props.product.category.name,
@@ -147,12 +148,16 @@ const breadCrumb = ref([
 const disabled = ref(false)
 const toast = useToast()
 const quantityInput = useTemplateRef('quantity-input')
-const productCart = ref({
-    productId: props.product.id,
-    name: props.product.name,
-    quantity: 1,
-    price: props.product.price,
-})
+const user = computed(() => page.props.auth.user)
+const productCart = ref({})
+
+if (user.value != null) {
+    productCart.value = {
+        productId: props.product.id,
+        userId: user.value.id,
+        quantity: 1,
+    }
+}
 
 onMounted(() => {
     quantityInput.value.onchange = function (e) {
@@ -161,17 +166,19 @@ onMounted(() => {
 })
 
 function addToCart() {
-    const cart = JSON.parse(localStorage.getItem('cart')) ?? {};
+    disabled.value = true;
 
-    if ( cart[props.product.id] ) {
-        cart[props.product.id]['quantity'] += productCart.value.quantity;
-    } else {
-        cart[props.product.id] = productCart.value;
-    }
-
-    localStorage.setItem('cart', JSON.stringify(cart));
-    toast.add({ severity: 'success', summary: 'Success', detail: 'Cart added', life: 2000 })
-    cartNumberStore.update();
+    axios.post(route('cart.add'), {
+        product: productCart.value,
+    })
+        .then(function (response) {
+            disabled.value = false;
+            router.reload({ only: ['cartNumber'] })
+            toast.add({ severity: 'success', summary: response.data.message, life: 2000 })
+        })
+        .catch(function (error) {
+            toast.add({ severity: 'info', summary: 'Info', detail: 'You need to log in to add to cart', life: 2000 })
+        })
 }
 
 </script>

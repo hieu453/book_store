@@ -74,8 +74,10 @@
                                         <template #footer>
                                             <div class="flex gap-2 mt-1 items-center">
                                                 <Link
-                                                    :href="route('product.show', { slug: product.slug })"
-                                                    :data="{ id: product.id }"
+                                                    :href="route('product.show', {
+                                                        slug: product.slug,
+                                                        id: product.id,
+                                                    })"
                                                     class="w-full btn bg-purple-800 hover:bg-purple-600">
                                                     View
                                                 </Link>
@@ -111,13 +113,15 @@ import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { ref } from 'vue';
 
 const props = defineProps({
-    'products': {
+    products: {
         type: Object,
     },
-    'category_name': {
+    category_name: {
         type: String,
     }
 })
+
+console.log(props.products)
 
 const breadCrumb = ref([
     {

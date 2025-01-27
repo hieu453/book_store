@@ -1,24 +1,29 @@
 <template>
     <section class="bg-white py-8 antialiased dark:bg-gray-900 md:py-8">
         <Head title="Cart" />
+        <Toast />
         <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
             <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">Shopping Cart</h2>
 
             <div class="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start xl:gap-8">
                 <div class="mx-auto w-full flex-none lg:max-w-2xl xl:max-w-4xl">
-                    <div class="space-y-6">
+                    <div v-if="cart.length > 0" class="space-y-6">
                         <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:py-3 md:px-6 mb-3">
                             <div class="space-y-4 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0">
-                                <input type="checkbox">
+                                <input type="checkbox" v-model="checkedAll" @change="checkAllItem">
+                                <span><button @click="deleteBatch">Delete</button></span>
+                                {{ checkedAll }}
                             </div>
+                            <!-- {{ checkedItems }} -->
                         </div>
                     </div>
-                    <template v-if="Object.keys(cart).length">
-                        <div v-for="( item, itemId ) in cart" class="space-y-6">
+                    <template v-if="cart.length > 0">
+                        <div v-for="(item, index ) in cart" class="space-y-6">
                             <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:p-6">
                                 <div class="space-y-4 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0">
                                     <span>
-                                        <input type="checkbox" :value="itemId">
+                                        <input type="checkbox" v-model="item.checked" :value="item" @change="clearCheckedAllButton">
+                                        {{ item.checked }}
                                     </span>
                                     <a href="#" class="shrink-0 md:order-1">
                                         <img class="h-20 w-20 dark:hidden"
@@ -34,9 +39,12 @@
                                         <div class="flex items-center">
                                             <!-- Decrease button -->
                                             <button type="button" id="decrement-button-2"
-                                                @click.prevent="decreaseQuantity(itemId)"
+                                                @click.prevent="decreaseQuantity(item.id, index)"
                                                 data-input-counter-decrement="counter-input-2"
-                                                :class="{ 'bg-gray-50 hover:bg-gray-50 hover:cursor-not-allowed': item.quantity == 1 }"
+                                                :class="{
+                                                    'bg-gray-50 hover:bg-gray-50 hover:cursor-not-allowed': item.quantity == 1,
+                                                }"
+                                                :disabled="item.quantity == 1"
                                                 class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
                                                 <svg class="h-2.5 w-2.5 text-gray-900 dark:text-white" aria-hidden="true"
                                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
@@ -45,12 +53,14 @@
                                                 </svg>
                                             </button>
                                             <!-- Product quantity -->
-                                            <input type="text" id="counter-input-2" data-input-counter
+                                            <span id="counter-input-2"
                                                 class="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:text-white"
-                                                placeholder="" :value="item.quantity" required />
+                                            >
+                                                {{ item.quantity }}
+                                            </span>
                                             <!-- Increase button -->
                                             <button type="button" id="increment-button-2"
-                                                @click.prevent="increaseQuantity(itemId)"
+                                                @click.prevent="increaseQuantity(item.id, index)"
                                                 data-input-counter-increment="counter-input-2"
                                                 class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
                                                 <svg class="h-2.5 w-2.5 text-gray-900 dark:text-white" aria-hidden="true"
@@ -61,13 +71,13 @@
                                             </button>
                                         </div>
                                         <div class="text-end md:order-4 md:w-32">
-                                            <p class="text-base font-bold text-gray-900 dark:text-white">${{ (item.price * item.quantity).toFixed(2) }}</p>
+                                            <p class="text-base font-bold text-gray-900 dark:text-white">${{ (item.product.price * item.quantity).toFixed(2) }}</p>
                                         </div>
                                     </div>
 
                                     <div class="w-full min-w-0 flex-1 space-y-4 md:order-2 md:max-w-md">
                                         <a href="#"
-                                            class="text-base font-medium text-gray-900 hover:underline dark:text-white">{{ item.name }}</a>
+                                            class="text-base font-medium text-gray-900 hover:underline dark:text-white">{{ item.product.name }}</a>
 
                                         <div class="flex items-center gap-4">
                                             <button type="button"
@@ -83,7 +93,7 @@
                                             </button>
 
                                             <button type="button"
-                                                @click="removeItem(itemId)"
+                                                @click="removeItem(item.id)"
                                                 class="inline-flex items-center text-sm font-medium text-red-600 hover:underline dark:text-red-500">
                                                 <svg class="me-1.5 h-5 w-5" aria-hidden="true"
                                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
@@ -186,44 +196,99 @@
 
 <script setup>
 import { Head, router, usePage, Link } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
-import { cartNumberStore } from '@/store/cartNumberStore';
+import { useToast } from 'primevue/usetoast';
+import Toast from 'primevue/toast';
+import { computed, onMounted, onUpdated, ref } from 'vue';
 
-const cart = ref(JSON.parse(localStorage.getItem('cart')) ?? {})
-
-const totalPrice = computed(() => {
-    if (cart.value) {
-        return Object.values(cart.value).reduce((acc, item) => {
-            return acc + (item.price * item.quantity)
-        }, 0)
+const props = defineProps({
+    cartItems: {
+        type: Object
     }
+})
+const totalPrice = computed(() => {
+    return cart.value.reduce((total, item) => {
+        return total + (item.product.price * item.quantity)
+    }, 0)
 
-    return 0;
+})
+const checkedAll = ref(false)
+const cart = ref(props.cartItems);
+const toast = useToast()
+
+onMounted(() => {
+    cart.value.forEach((item) => {
+        item.checked = false;
+    })
 })
 
-function increaseQuantity(itemId) {
-    cart.value[itemId].quantity += 1;
-    localStorage.setItem('cart', JSON.stringify(cart.value))
-    cart.value = JSON.parse(localStorage.getItem('cart'))
-    cartNumberStore.update();
+onUpdated(() => {
+    cart.value = props.cartItems
+})
+
+const checkedItems = computed(() => {
+    return cart.value.filter(item => item.checked)
+})
+
+function checkAllItem() {
+    if (checkedAll.value) {
+        cart.value.forEach((item) => {
+            item.checked = true;
+        })
+    } else {
+        cart.value.forEach((item) => {
+            item.checked = false;
+        })
+    }
 }
 
-function decreaseQuantity(itemId) {
-    if (cart.value[itemId].quantity == 1) {
-        return;
-    }
+function clearCheckedAllButton() {
+    checkedAll.value = false;
+}
 
-    cart.value[itemId].quantity -= 1
-    localStorage.setItem('cart', JSON.stringify(cart.value))
-    cart.value = JSON.parse(localStorage.getItem('cart'))
-    cartNumberStore.update();
+function increaseQuantity(itemId, index) {
+    cart.value[index]['quantity']++;
+
+    axios.post(route('cart.increase'), {
+        itemId,
+    })
+        .then(response => {
+        })
+        .catch(error => {
+            console.log(error);
+        })
+}
+
+function decreaseQuantity(itemId, index) {
+    cart.value[index]['quantity']--;
+
+    axios.post(route('cart.decrease'), {
+        itemId,
+    })
+        .then(response => {
+        })
+        .catch(error => {
+            console.log(error)
+        })
 }
 
 function removeItem(itemId) {
-    delete cart.value[itemId]
-    localStorage.setItem('cart', JSON.stringify(cart.value))
-    cart.value = JSON.parse(localStorage.getItem('cart'))
-    cartNumberStore.update();
+    router.delete(route('cart.remove.item', { id: itemId }), {
+        preserveScroll: true,
+        onSuccess: () => {
+            toast.add({ severity: 'success', summary: 'Item deleted', life: 2000 });
+        }
+    })
+}
+
+function deleteBatch() {
+    router.post(route('cart.delete.items'), {
+        cartItems: checkedItems.value
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            toast.add({ severity: 'success', summary: 'Items deleted', life: 2000 });
+        }
+    })
 }
 
 function processToCheckout() {
