@@ -1,15 +1,17 @@
 <?php
 
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ProductController;
+use App\Models\Cart;
 use Inertia\Inertia;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CategoryController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Home/HomePage', [
@@ -41,18 +43,29 @@ Route::get('/checkout', function (Request $request) {
     ]);
 })->name('checkout');
 
-Route::get('/charge-checkout', function (Request $request) {
+Route::get('/payment', function (Request $request) {
 
-    return Inertia::render('Payment');
-});
+    return Inertia::render('Payment', [
+        'cart' => session('checkedItems')
+    ]);
+})->name('payment');
 
 Route::post('/purchase', function (Request $request) {
-    // dd($request->paymentMethodId);
-    $stripeCharge = $request->user()->charge(
-        100, $request->paymentMethodId, [
-            'return_url' => route('checkout-success'),
-        ]
-    );
+    // $stripeCharge = $request->user()->charge(
+    //     $request->totalPrice * 100, $request->paymentMethodId, [
+    //         'return_url' => route('checkout-success'),
+    //     ]
+    // );
+
+    // dd(session('checkedItems'));
+    // session()->forget('checkedItems');
+    $itemIds = [];
+    foreach (session('checkedItems') as $item) {
+        $itemIds[] = $item['id'];
+    }
+
+    dd($itemIds);
+
 });
 
 Route::inertia('/checkout/success', 'Success')->name('checkout-success');
@@ -75,6 +88,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/increase', [CartController::class, 'increaseQuantity'])->name('cart.increase');
     Route::post('/cart/decrease', [CartController::class, 'decreaseQuantity'])->name('cart.decrease');
     Route::get('/cart/cart-number', [CartController::class, 'getCartNumber'])->name('cart.number');
+    Route::post('/cart/set-total-price-to-session', [CartController::class, 'setTotalPriceToSession'])->name('cart.total');
     Route::get('/cart/checkout', [CartController::class, 'showCheckout'])->name('cart.checkout');
     Route::post('/cart/delete', [CartController::class, 'deleteCartItems'])->name('cart.delete.items');
     Route::delete('/cart/remove/{id}', [CartController::class, 'removeItem'])->name('cart.remove.item');

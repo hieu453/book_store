@@ -4,7 +4,7 @@
         <Breadcrumb :data="breadCrumb" />
         <WhenVisible data="permissions" :buffer="500">
             <template #fallback>
-                <DataView :value="products" layout="grid">
+                <!-- <DataView :value="products" layout="grid">
                     <template #grid>
                         <div class="grid md:grid-cols-3">
                             <div v-for="i in 12" :key="i" class="col-12 sm:col-6 lg:col-12 xl:col-4 p-2">
@@ -26,13 +26,13 @@
                             </div>
                         </div>
                     </template>
-                </DataView>
+                </DataView> -->
             </template>
 
             <div class="">
-                <div v-if="products.length > 0">
+                <div v-if="products.data.length > 0">
                     <DataView
-                        :value="products"
+                        :value="products.data"
                         :sortField="sortField"
                         :sortOrder="sortOrder"
                         paginator
@@ -88,6 +88,7 @@
                             </div>
                         </template>
                     </DataView>
+                    <Pagination :products="products" />
                 </div>
 
                 <div
@@ -110,10 +111,11 @@ import Select from 'primevue/select';
 import Skeleton from 'primevue/skeleton';
 import Card from 'primevue/card';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
+import Pagination from '@/Components/Pagination.vue';
 import { ref } from 'vue';
 
 const props = defineProps({
-    'products': {
+    products: {
         type: Object,
     }
 })

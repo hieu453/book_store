@@ -1,4 +1,5 @@
 <template>
+    <Head title="Payment" />
     <div class="px-5 py-5 mx-auto max-w-lg md:flex md:max-w-full md:items-start md:justify-center md:gap-16">
         <div class="md:grow md:max-w-lg md:h-screen">
             <div v-for="item in cart" class="border flex gap-6 mb-2 rounded-lg">
@@ -10,12 +11,19 @@
                     >
                 </div>
                 <div>
-                    <p class="text-lg">{{ item.name }}</p>
+                    <p class="text-lg">{{ item.product.name }}</p>
                     <div class="space-x-2">
                         <span class="text-sm">{{ item.quantity }}</span>
                         <span>x</span>
-                        <span class="text-sm">${{ item.price }}</span>
+                        <span class="text-sm">${{ item.product.price }}</span>
                     </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <div class="flex justify-between">
+                    <h1 class="font-bold text-2xl">Total:</h1>
+                    <h1 class="font-bold text-2xl">${{ totalPrice.toFixed(2) }}</h1>
                 </div>
             </div>
         </div>
@@ -53,16 +61,24 @@
 
 <script setup>
 import { loadStripe } from '@stripe/stripe-js';
-import { onMounted, ref, useTemplateRef } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { computed, onMounted, ref, useTemplateRef } from 'vue';
+import { router, Head } from '@inertiajs/vue3';
 
-const cart = ref(JSON.parse(localStorage.getItem('cart')))
+const props = defineProps({
+    cart: {
+        type: Object,
+    }
+})
 const stripe = ref();
 const cardElement = ref();
 const elements = ref();
 const error = ref(false);
 const displayError = ref('');
-const test = ref();
+const totalPrice = computed(() => {
+    return props.cart.reduce((totalPrice, item) => {
+        return totalPrice + (item.product.price * item.quantity)
+    }, 0)
+})
 
 onMounted(async () => {
     stripe.value = await loadStripe(import.meta.env.VITE_STRIPE_KEY)
@@ -95,25 +111,26 @@ onMounted(async () => {
 })
 
 async function pay() {
-    // const { paymentMethod, error } = await stripe.value.createPaymentMethod(
-    //     'card', cardElement.value, {
-    //         billing_details: { name: 'hieu' }
-    //     }
-    // );
+    const { paymentMethod, error } = await stripe.value.createPaymentMethod(
+        'card', cardElement.value, {
+            billing_details: { name: 'hieu' }
+        }
+    );
 
-    // if (error) {
-    //     // Display "error.message" to the user...
-    //     console.log(error.message);
-    // } else {
-    //     // The card has been verified successfully...
-    //     router.post('/purchase', {
-    //         paymentMethodId: paymentMethod.id
-    //     }, {
-    //         onSuccess: () => {
-    //             router.get(route('checkout-success'))
-    //         }
-    //     })
-    // }
+    if (error) {
+        // Display "error.message" to the user...
+        console.log(error.message);
+    } else {
+        // The card has been verified successfully...
+        router.post('/purchase', {
+            paymentMethodId: paymentMethod.id,
+            totalPrice: totalPrice.value,
+        }, {
+            onSuccess: () => {
+                router.get(route('checkout-success'))
+            }
+        })
+    }
 }
 
 </script>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
@@ -52,10 +53,22 @@ class CartController extends Controller
         return response()->noContent();
     }
 
+    public function setTotalPriceToSession(Request $request)
+    {
+        session()->put('checkedItems', $request->checkedItems);
+
+        return to_route('cart.checkout');
+    }
+
     public function showCheckout(Request $request)
     {
-        // dd($request->totalPrice);
-        return Inertia::render('Home/Cart/Checkout');
+        // dd($request->all());
+        if (! session('checkedItems')) {
+            return redirect()->back();
+        }
+        return Inertia::render('Home/Cart/Checkout', [
+            'checkedItems' => session('checkedItems'),
+        ]);
     }
 
     public function deleteCartItems(Request $request)

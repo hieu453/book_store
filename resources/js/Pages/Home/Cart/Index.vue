@@ -12,7 +12,6 @@
                             <div class="space-y-4 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0">
                                 <input type="checkbox" v-model="checkedAll" @change="checkAllItem">
                                 <span><button @click="deleteBatch">Delete</button></span>
-                                {{ checkedAll }}
                             </div>
                             <!-- {{ checkedItems }} -->
                         </div>
@@ -22,8 +21,7 @@
                             <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:p-6">
                                 <div class="space-y-4 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0">
                                     <span>
-                                        <input type="checkbox" v-model="item.checked" :value="item" @change="clearCheckedAllButton">
-                                        {{ item.checked }}
+                                        <input type="checkbox" v-model="item.checked" :value="item" @change="detectCheckAllOrNot">
                                     </span>
                                     <a href="#" class="shrink-0 md:order-1">
                                         <img class="h-20 w-20 dark:hidden"
@@ -153,6 +151,8 @@
 
                         <button
                             @click="processToCheckout"
+                            :disabled="loading"
+                            :class="{ 'cursor-not-allowed': loading }"
                             class="flex w-full items-center justify-center rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-purple-700 focus:outline-none dark:bg-blue-600 dark:hover:bg-blue-700"
                         >
                             Proceed to Checkout
@@ -205,15 +205,11 @@ const props = defineProps({
         type: Object
     }
 })
-const totalPrice = computed(() => {
-    return cart.value.reduce((total, item) => {
-        return total + (item.product.price * item.quantity)
-    }, 0)
 
-})
 const checkedAll = ref(false)
-const cart = ref(props.cartItems);
+const cart = ref(props.cartItems)
 const toast = useToast()
+const loading = ref(false)
 
 onMounted(() => {
     cart.value.forEach((item) => {
@@ -229,6 +225,13 @@ const checkedItems = computed(() => {
     return cart.value.filter(item => item.checked)
 })
 
+const totalPrice = computed(() => {
+    return checkedItems.value.reduce((total, item) => {
+        return total + (item.product.price * item.quantity)
+    }, 0)
+
+})
+
 function checkAllItem() {
     if (checkedAll.value) {
         cart.value.forEach((item) => {
@@ -241,17 +244,24 @@ function checkAllItem() {
     }
 }
 
-function clearCheckedAllButton() {
+function detectCheckAllOrNot() {
+    const checkedAllItems = cart.value.every(item => item.checked == true)
+    if (checkedAllItems) {
+        checkedAll.value = true;
+        return;
+    }
     checkedAll.value = false;
 }
 
 function increaseQuantity(itemId, index) {
     cart.value[index]['quantity']++;
+    loading.value = true;
 
     axios.post(route('cart.increase'), {
         itemId,
     })
         .then(response => {
+            loading.value = false;
         })
         .catch(error => {
             console.log(error);
@@ -260,11 +270,13 @@ function increaseQuantity(itemId, index) {
 
 function decreaseQuantity(itemId, index) {
     cart.value[index]['quantity']--;
+    loading.value = true;
 
     axios.post(route('cart.decrease'), {
         itemId,
     })
         .then(response => {
+            loading.value = false;
         })
         .catch(error => {
             console.log(error)
@@ -292,6 +304,13 @@ function deleteBatch() {
 }
 
 function processToCheckout() {
-    router.get(route('cart.checkout'))
+    if (checkedItems.value.length < 1) {
+        toast.add({ severity: 'warn', summary: 'Please select item(s)', life: 2000 })
+        return;
+    }
+    router.post(route('cart.total'), {
+        checkedItems: checkedItems.value
+    })
+    // console.log(checkedItems.value)
 }
 </script>
