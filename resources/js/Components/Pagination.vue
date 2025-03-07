@@ -1,27 +1,51 @@
 <template>
-    <ul>
+    <ul class="space-x-2 flex justify-center items-center">
+        <Link
+            :href="route('products')"
+            :data="{ page: 1 }"
+            :class="[
+                products.current_page == 1
+                ? 'pointer-events-none opacity-20'
+                : 'hover:bg-slate-500 hover:text-white'
+                , 'rounded-full w-10 h-10 flex items-center justify-center'
+            ]"
+        >
+            <i class="pi pi-angle-double-left"></i>
+        </Link>
         <template v-for="pageNumber in products.last_page">
-            <span v-if="pageNumber == products.last_page && Math.abs(pageNumber - products.current_page) > 3">...</span>
+            <span v-if="pageNumber == products.last_page && Math.abs(pageNumber - products.current_page) > centerNumber">...</span>
             <li
-                v-if="Math.abs(pageNumber - products.current_page) < 3
+                v-if="Math.abs(pageNumber - products.current_page) < centerNumber
                 || pageNumber == 1
                 || pageNumber == products.last_page"
-                class="rounded-xl bg-purple-700"
             >
                 <Link
                     :href="route('products')"
                     :data="{ page: pageNumber }"
-                    :class="{
-                        current: pageNumber == products.current_page,
-                        // first: (pageNumber == 1 && Math.abs(pageNumber - products.current_page) > 3),
-                        // last: (pageNumber == products.last_page && Math.abs(pageNumber - products.current_page) > 3),
-                    }"
+                    :class="[
+                        pageNumber == products.current_page
+                            ? 'text-white bg-purple-400'
+                            : 'hover:bg-slate-500 hover:text-white transition ease-in-out'
+                            , 'rounded-full w-10 h-10 flex items-center justify-center'
+                    ]"
                 >
                     {{ pageNumber }}
                 </Link>
             </li>
-            <span v-if="pageNumber == 1 && Math.abs(pageNumber - products.current_page) > 3">...</span>
+            <span v-if="pageNumber == 1 && Math.abs(pageNumber - products.current_page) > centerNumber">...</span>
         </template>
+         <Link
+            :href="route('products')"
+            :data="{ page: products.last_page }"
+            :class="[
+                products.current_page == products.last_page
+                ? 'pointer-events-none opacity-20'
+                : 'hover:bg-slate-500 hover:text-white'
+                , 'rounded-full w-10 h-10 flex items-center justify-center'
+            ]"
+         >
+            <i class="pi pi-angle-double-right"></i>
+        </Link>
     </ul>
 </template>
 
@@ -33,24 +57,6 @@ const props = defineProps({
         type: Object,
     }
 })
-console.log(props.products)
-const itemsPerPage = 3
 
-// const totalPage =
+const centerNumber = 3;
 </script>
-
-<style scoped>
-li {
-    display: inline-block;
-    margin: 5px 5px;
-}
-a.first::after {
-    content: '...';
-}
-a.last::before {
-    content: '...';
-}
-.current {
-    color: red;
-}
-</style>

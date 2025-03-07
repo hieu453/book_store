@@ -9,11 +9,12 @@
                 <div class="mx-auto w-full flex-none lg:max-w-2xl xl:max-w-4xl">
                     <div v-if="cart.length > 0" class="space-y-6">
                         <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:py-3 md:px-6 mb-3">
-                            <div class="space-y-4 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0">
-                                <input type="checkbox" v-model="checkedAll" @change="checkAllItem">
-                                <span><button @click="deleteBatch">Delete</button></span>
+                            <div class="space-y-4 flex items-center justify-between gap-6">
+                                <input type="checkbox" :checked="isCheckAll" @change="checkAll">
+                                {{ isCheckAll }}
+                                <!-- <span><button @click="deleteBatch">Delete</button></span> -->
+                                <span><button @click="removeItems(checkedItems)">Delete</button></span>
                             </div>
-                            <!-- {{ checkedItems }} -->
                         </div>
                     </div>
                     <template v-if="cart.length > 0">
@@ -21,7 +22,12 @@
                             <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:p-6">
                                 <div class="space-y-4 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0">
                                     <span>
-                                        <input type="checkbox" v-model="item.checked" :value="item" @change="detectCheckAllOrNot">
+                                        <input
+                                            type="checkbox"
+                                            :checked="item.checked"
+                                            @change="checkItem(index)"
+                                        >
+                                        {{ item.checked }}
                                     </span>
                                     <a href="#" class="shrink-0 md:order-1">
                                         <img class="h-20 w-20 dark:hidden"
@@ -91,7 +97,7 @@
                                             </button>
 
                                             <button type="button"
-                                                @click="removeItem(item.id)"
+                                                @click="removeItems([ item ])"
                                                 class="inline-flex items-center text-sm font-medium text-red-600 hover:underline dark:text-red-500">
                                                 <svg class="me-1.5 h-5 w-5" aria-hidden="true"
                                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
@@ -195,10 +201,10 @@
 </template>
 
 <script setup>
-import { Head, router, usePage, Link } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
-import { computed, onMounted, onUpdated, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 const props = defineProps({
     cartItems: {
@@ -206,19 +212,13 @@ const props = defineProps({
     }
 })
 
-const checkedAll = ref(false)
 const cart = ref(props.cartItems)
 const toast = useToast()
 const loading = ref(false)
+const isCheckAll = ref(false)
 
 onMounted(() => {
-    cart.value.forEach((item) => {
-        item.checked = false;
-    })
-})
-
-onUpdated(() => {
-    cart.value = props.cartItems
+    isCheckAll.value = cart.value.every(item => item.checked)
 })
 
 const checkedItems = computed(() => {
@@ -232,26 +232,32 @@ const totalPrice = computed(() => {
 
 })
 
-function checkAllItem() {
-    if (checkedAll.value) {
-        cart.value.forEach((item) => {
-            item.checked = true;
+function checkItem(index) {
+    cart.value[index].checked = ! cart.value[index].checked
+    isCheckAll.value = cart.value.every(item => item.checked)
+
+    axios.put(route('cart.check.item'), {
+        itemId: cart.value[index].id,
+    })
+        .then(response => {
         })
-    } else {
-        cart.value.forEach((item) => {
-            item.checked = false;
+        .catch(error => {
+            console.log(error);
         })
-    }
 }
 
-function detectCheckAllOrNot() {
-    const checkedAllItems = cart.value.every(item => item.checked == true)
-    if (checkedAllItems) {
-        checkedAll.value = true;
-        return;
-    }
-    checkedAll.value = false;
+function checkAll() {
+    isCheckAll.value = !isCheckAll.value
+    cart.value.forEach(item => item.checked = isCheckAll.value);
+
+    axios.put(route('cart.check.item'), {
+        isCheckAll: isCheckAll.value,
+    })
+        .then(res => {
+        })
+        .catch(err => console.log(err.message))
 }
+
 
 function increaseQuantity(itemId, index) {
     cart.value[index]['quantity']++;
@@ -283,22 +289,18 @@ function decreaseQuantity(itemId, index) {
         })
 }
 
-function removeItem(itemId) {
-    router.delete(route('cart.remove.item', { id: itemId }), {
-        preserveScroll: true,
-        onSuccess: () => {
-            toast.add({ severity: 'success', summary: 'Item deleted', life: 2000 });
-        }
-    })
-}
+/**
+ *
+ * @param {Array.number} items
+ */
+function removeItems(items) {
+    const itemIds = items.map(item => item.id);
 
-function deleteBatch() {
-    router.post(route('cart.delete.items'), {
-        cartItems: checkedItems.value
-    }, {
+    router.delete(route('cart.remove.items', { ids: itemIds }), {
         preserveScroll: true,
         onSuccess: () => {
-            toast.add({ severity: 'success', summary: 'Items deleted', life: 2000 });
+            cart.value = props.cartItems
+            toast.add({ severity: 'success', summary: 'Item deleted', life: 2000 });
         }
     })
 }
@@ -311,6 +313,5 @@ function processToCheckout() {
     router.post(route('cart.total'), {
         checkedItems: checkedItems.value
     })
-    // console.log(checkedItems.value)
 }
 </script>

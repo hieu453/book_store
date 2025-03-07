@@ -208,10 +208,6 @@ const props = defineProps({
     }
 })
 
-// props.cart.forEach((el) => {
-//     console.log(el.product.price)
-// })
-
 const addMoreFee = ref(false);
 
 const totalPrice = computed(() => {
@@ -239,6 +235,6 @@ onMounted(() => {
 })
 
 function processToPayment() {
-    router.get(route('payment'))
+    router.post(route('payment'))
 }
 </script>

@@ -36,11 +36,10 @@ class CartController extends Controller
 
     public function increaseQuantity(Request $request)
     {
-        $cart = Cart::with(['product', 'user'])->where('id', $request->itemId)->first();
+        $cart = Cart::where('id', $request->itemId)->first();
         $cart->quantity += 1;
         $cart->save();
 
-        // return response()->json(['cart' => $cart]);
         return response()->noContent();
     }
 
@@ -53,22 +52,26 @@ class CartController extends Controller
         return response()->noContent();
     }
 
-    public function setTotalPriceToSession(Request $request)
+    public function setCheckedItemsToSession(Request $request)
     {
         session()->put('checkedItems', $request->checkedItems);
 
-        return to_route('cart.checkout');
+        return to_route('checkout');
     }
 
-    public function showCheckout(Request $request)
+    public function checkItem(Request $request)
     {
-        // dd($request->all());
-        if (! session('checkedItems')) {
-            return redirect()->back();
+        if ($request->has('isCheckAll')) {
+            Cart::where('user_id', Auth::id())->update([
+                'checked' => $request->input('isCheckAll')
+            ]);
+        } else {
+            $item = Cart::where('id', $request->itemId)->where('user_id', Auth::id())->first();
+            $item->checked = ! $item->checked;
+            $item->save();
         }
-        return Inertia::render('Home/Cart/Checkout', [
-            'checkedItems' => session('checkedItems'),
-        ]);
+
+        return response()->noContent();
     }
 
     public function deleteCartItems(Request $request)
@@ -79,9 +82,14 @@ class CartController extends Controller
         return redirect()->back();
     }
 
-    public function removeItem($itemId)
+    public function removeItems($ids)
     {
-        Cart::destroy($itemId);
+        $itemIds = [];
+        foreach (explode(',', $ids) as $stringId) {
+            $itemIds[] = (int) $stringId;
+        }
+
+        Cart::destroy($itemIds);
 
         return redirect()->back();
     }

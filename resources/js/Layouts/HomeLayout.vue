@@ -54,22 +54,24 @@
                             </div>
                         </div>
                     </div>
-                    <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                    <div class="absolute inset-y-0 right-0 flex gap-2 items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                         <Link
                             type="button"
                             :href="route('cart')"
-                            class="relative group mr-2 rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none"
+                            class="relative group rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none"
                         >
                             <span class="absolute -inset-1.5" />
                             <span class="sr-only">View notifications</span>
                             <ShoppingCartIcon class="size-6" aria-hidden="true" />
                             <div v-if="page.props.cartNumber">
+                                <!-- Show on Cart/Index -->
                                 <div
                                     v-if="cartNumber"
                                     class="rounded-full absolute -top-3 left-4 text-xs bg-red-500 px-2 py-0.5 text-white"
                                 >
                                     {{ cartNumber }}
                                 </div>
+                                <!-- Show on pages except Cart/Index -->
                                 <div
                                     v-else
                                     class="rounded-full absolute -top-3 left-4 text-xs bg-red-500 px-2 py-0.5 text-white"
@@ -86,7 +88,7 @@
                         </button>
 
                         <!-- Profile dropdown -->
-                        <Menu v-if="user" as="div" class="relative ml-3">
+                        <Menu v-if="user" as="div" class="relative">
                             <div>
                                 <MenuButton
                                     class="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
@@ -162,6 +164,7 @@
                             </a>
                         </div>
                     </div>
+                    <!-- Need to review -->
                     <Link v-for="(item, index) in navigation" :key="item.name" as="a" :href="item.href"
                         :class="[item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'block rounded-md px-3 py-2 text-base font-medium']"
                         :aria-current="item.current ? 'page' : undefined"

@@ -4,7 +4,7 @@
         <Breadcrumb :data="breadCrumb" />
         <WhenVisible data="permissions" :buffer="500">
             <template #fallback>
-                <!-- <DataView :value="products" layout="grid">
+                <DataView :value="products.data" layout="grid">
                     <template #grid>
                         <div class="grid md:grid-cols-3">
                             <div v-for="i in 12" :key="i" class="col-12 sm:col-6 lg:col-12 xl:col-4 p-2">
@@ -26,71 +26,41 @@
                             </div>
                         </div>
                     </template>
-                </DataView> -->
+                </DataView>
             </template>
 
-            <div class="">
+            <div class="mt-2">
                 <div v-if="products.data.length > 0">
-                    <DataView
-                        :value="products.data"
-                        :sortField="sortField"
-                        :sortOrder="sortOrder"
-                        paginator
-                        :alwaysShowPaginator="false"
-                        :rows="12"
-                        currentPageReportTemplate
-                        layout="grid"
-                        :pt="{
-                            pcPaginator: {
-                                PaginatorContainer: 'mt-2',
-                            },
-                            // content: 'text-center',
-                            header: {
-                                style: {
-                                    border: 'none'
-                                }
-                            }
-                        }">
-                        <template #header>
-                            <div class="space-x-2.5 flex justify-center md:justify-end">
-                                <Select v-model="sortKey" :options="sortOptions" optionLabel="label" placeholder="Sort By Price" @change="onSortChange($event)" />
-                                <Select v-model="sortKey" :options="sortName" optionLabel="label" placeholder="Sort By Name" @change="onSortChange($event)" />
-                            </div>
-                        </template>
-                        <template #grid="slotProps">
-                            <div class="grid md:grid-cols-4 gap-4">
-                                <div v-for="product in slotProps.items" :key="product.id">
-                                    <Card style="overflow: hidden;">
-                                        <template #header>
-                                            <img alt="user header" src="https://primefaces.org/cdn/primevue/images/usercard.png" />
-                                        </template>
-                                        <template #title>{{ product.category.name }}</template>
-                                        <template #subtitle>{{ product.name }}</template>
-                                        <template #content>
-                                            <p class="m-0">
-                                                ${{ product.price }}
-                                            </p>
-                                        </template>
-                                        <template #footer>
-                                            <div class="flex gap-2 mt-1 items-center">
-                                                <Link
-                                                    :href="route('product.show', {
-                                                        slug: product.slug,
-                                                        id: product.id,
-                                                    })"
-                                                    class="w-full btn bg-purple-800 hover:bg-purple-600">
-                                                    View
-                                                </Link>
-                                            </div>
-                                        </template>
-                                    </Card>
-                                </div>
-                            </div>
-                        </template>
-                    </DataView>
-                    <Pagination :products="products" />
+                    <div class="grid md:grid-cols-4 gap-4">
+                        <div v-for="product in products.data" :key="product.id">
+                            <Card style="overflow: hidden;">
+                                <template #header>
+                                    <img alt="user header" src="https://primefaces.org/cdn/primevue/images/usercard.png" />
+                                </template>
+                                <template #title>{{ product.category.name }}</template>
+                                <template #subtitle>{{ product.name }}</template>
+                                <template #content>
+                                    <p class="m-0">
+                                        ${{ product.price }}
+                                    </p>
+                                </template>
+                                <template #footer>
+                                    <div class="flex gap-2 mt-1 items-center">
+                                        <Link
+                                            :href="route('product.show', {
+                                                slug: product.slug,
+                                                id: product.id,
+                                            })"
+                                            class="w-full btn bg-purple-800 hover:bg-purple-600">
+                                            View
+                                        </Link>
+                                    </div>
+                                </template>
+                            </Card>
+                        </div>
+                    </div>
+                    <Pagination :products="products" class="mt-2" />
                 </div>
-
                 <div
                     v-else
                     class="h-screen text-center content-center"
@@ -129,14 +99,6 @@ const breadCrumb = ref([
 const sortKey = ref();
 const sortOrder = ref();
 const sortField = ref();
-const sortOptions = ref([
-    {label: 'Price High to Low', value: '!price'},
-    {label: 'Price Low to High', value: 'price'},
-]);
-const sortName = ref([
-    {label: 'Name Ascending', value: '!name'},
-    {label: 'Name Descending', value: 'name'},
-])
 
 const onSortChange = (event) => {
     const value = event.value.value;

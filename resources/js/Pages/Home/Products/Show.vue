@@ -177,7 +177,16 @@ function addToCart() {
             toast.add({ severity: 'success', summary: response.data.message, life: 2000 })
         })
         .catch(function (error) {
-            toast.add({ severity: 'info', summary: 'Info', detail: 'You need to log in to add to cart', life: 2000 })
+            disabled.value = false;
+
+            switch (error.status) {
+                case 401:
+                    toast.add({ severity: 'info', summary: 'Info', detail: 'You need to log in to add to cart', life: 2000 })
+                    break;
+                default:
+                    toast.add({ severity: 'info', summary: 'Info', detail: 'There are some errors', life: 2000 })
+                    break;
+            }
         })
 }
 
