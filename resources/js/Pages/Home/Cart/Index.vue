@@ -11,7 +11,6 @@
                         <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:py-3 md:px-6 mb-3">
                             <div class="space-y-4 flex items-center justify-between gap-6">
                                 <input type="checkbox" :checked="isCheckAll" @change="checkAll">
-                                {{ isCheckAll }}
                                 <!-- <span><button @click="deleteBatch">Delete</button></span> -->
                                 <span><button @click="removeItems(checkedItems)">Delete</button></span>
                             </div>
@@ -27,7 +26,6 @@
                                             :checked="item.checked"
                                             @change="checkItem(index)"
                                         >
-                                        {{ item.checked }}
                                     </span>
                                     <a href="#" class="shrink-0 md:order-1">
                                         <img class="h-20 w-20 dark:hidden"
@@ -242,7 +240,9 @@ function checkItem(index) {
         .then(response => {
         })
         .catch(error => {
-            console.log(error);
+            toast.add({ severity: 'error', summary: error.message, life: 2000 });
+            cart.value[index].checked = ! cart.value[index].checked
+            isCheckAll.value = cart.value.every(item => item.checked)
         })
 }
 
@@ -255,7 +255,11 @@ function checkAll() {
     })
         .then(res => {
         })
-        .catch(err => console.log(err.message))
+        .catch(err => {
+            toast.add({ severity: 'error', summary: err.message, life: 2000 });
+            isCheckAll.value = !isCheckAll.value
+            cart.value.forEach(item => item.checked = isCheckAll.value);
+        })
 }
 
 

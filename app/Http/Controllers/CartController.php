@@ -22,16 +22,18 @@ class CartController extends Controller
 
         if ($cartItem) {
             $cartItem->quantity += $request->product['quantity'];
+            $cartItem->checked = $request->product['checked'] ?? false;
             $cartItem->save();
         } else {
             $cart = new Cart;
             $cart->product_id = $request->product['productId'];
             $cart->user_id = $request->product['userId'];
+            $cart->checked = $request->product['checked'] ?? false;
             $cart->quantity = $request->product['quantity'];
             $cart->save();
         }
 
-        return response()->json(['message' => 'Cart added']);
+        return response()->noContent();
     }
 
     public function increaseQuantity(Request $request)
