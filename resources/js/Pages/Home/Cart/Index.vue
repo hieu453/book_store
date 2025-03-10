@@ -41,7 +41,7 @@
                                         <div class="flex items-center">
                                             <!-- Decrease button -->
                                             <button type="button" id="decrement-button-2"
-                                                @click.prevent="decreaseQuantity(item.id, index)"
+                                                @click.prevent="updateQuantity(item.id, index, item.quantity - 1)"
                                                 data-input-counter-decrement="counter-input-2"
                                                 :class="{
                                                     'bg-gray-50 hover:bg-gray-50 hover:cursor-not-allowed': item.quantity == 1,
@@ -62,7 +62,7 @@
                                             </span>
                                             <!-- Increase button -->
                                             <button type="button" id="increment-button-2"
-                                                @click.prevent="increaseQuantity(item.id, index)"
+                                                @click.prevent="updateQuantity(item.id, index, item.quantity + 1)"
                                                 data-input-counter-increment="counter-input-2"
                                                 class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
                                                 <svg class="h-2.5 w-2.5 text-gray-900 dark:text-white" aria-hidden="true"
@@ -202,7 +202,7 @@
 import { Head, router } from '@inertiajs/vue3';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, reactive, ref, toRaw } from 'vue';
 
 const props = defineProps({
     cartItems: {
@@ -210,17 +210,17 @@ const props = defineProps({
     }
 })
 
-const cart = ref(props.cartItems)
+const cart = reactive(structuredClone(toRaw(props.cartItems)))
 const toast = useToast()
 const loading = ref(false)
 const isCheckAll = ref(false)
 
 onMounted(() => {
-    isCheckAll.value = cart.value.every(item => item.checked)
+    isCheckAll.value = cart.every(item => item.checked)
 })
 
 const checkedItems = computed(() => {
-    return cart.value.filter(item => item.checked)
+    return cart.filter(item => item.checked)
 })
 
 const totalPrice = computed(() => {
@@ -231,24 +231,24 @@ const totalPrice = computed(() => {
 })
 
 function checkItem(index) {
-    cart.value[index].checked = ! cart.value[index].checked
-    isCheckAll.value = cart.value.every(item => item.checked)
+    cart[index].checked = ! cart[index].checked
+    isCheckAll.value = cart.every(item => item.checked)
 
     axios.put(route('cart.check.item'), {
-        itemId: cart.value[index].id,
+        itemId: cart[index].id,
     })
         .then(response => {
         })
         .catch(error => {
             toast.add({ severity: 'error', summary: error.message, life: 2000 });
-            cart.value[index].checked = ! cart.value[index].checked
-            isCheckAll.value = cart.value.every(item => item.checked)
+            cart[index].checked = ! cart[index].checked
+            isCheckAll.value = cart.every(item => item.checked)
         })
 }
 
 function checkAll() {
     isCheckAll.value = !isCheckAll.value
-    cart.value.forEach(item => item.checked = isCheckAll.value);
+    cart.forEach(item => item.checked = isCheckAll.value);
 
     axios.put(route('cart.check.item'), {
         isCheckAll: isCheckAll.value,
@@ -258,38 +258,27 @@ function checkAll() {
         .catch(err => {
             toast.add({ severity: 'error', summary: err.message, life: 2000 });
             isCheckAll.value = !isCheckAll.value
-            cart.value.forEach(item => item.checked = isCheckAll.value);
+            cart.forEach(item => item.checked = isCheckAll.value);
         })
 }
 
-
-function increaseQuantity(itemId, index) {
-    cart.value[index]['quantity']++;
+function updateQuantity(itemId, index, newQuantity) {
+    const oldQuantity = props.cartItems[index].quantity;
+    cart[index].quantity = newQuantity;
     loading.value = true;
 
-    axios.post(route('cart.increase'), {
+    axios.put(route('cart.update.quantity'), {
         itemId,
+        newQuantity,
     })
-        .then(response => {
+        .then(res => {
             loading.value = false;
+
         })
         .catch(error => {
-            console.log(error);
-        })
-}
-
-function decreaseQuantity(itemId, index) {
-    cart.value[index]['quantity']--;
-    loading.value = true;
-
-    axios.post(route('cart.decrease'), {
-        itemId,
-    })
-        .then(response => {
+            toast.add({ severity: 'error', summary: error.message, life: 2000 })
+            cart[index].quantity = oldQuantity
             loading.value = false;
-        })
-        .catch(error => {
-            console.log(error)
         })
 }
 
@@ -300,13 +289,28 @@ function decreaseQuantity(itemId, index) {
 function removeItems(items) {
     const itemIds = items.map(item => item.id);
 
-    router.delete(route('cart.remove.items', { ids: itemIds }), {
-        preserveScroll: true,
-        onSuccess: () => {
-            cart.value = props.cartItems
-            toast.add({ severity: 'success', summary: 'Item deleted', life: 2000 });
-        }
-    })
+    axios.delete(route('cart.remove.items', { ids: itemIds }))
+        .then(res => {
+            router.get(route('cart'), {}, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.add({ severity: 'success', summary: 'Item deleted', life: 2000 });
+                }
+            })
+        })
+        .catch(err => {
+            toast.add({ severity: 'error', summary: err.message, life: 2000 });
+        })
+    // // router.delete(route('cart.remove.items', { ids: itemIds }), {
+    // //     preserveScroll: true,
+    // //     onSuccess: () => {
+    // //         router.get(route('cart'), {}, {
+    // //             preserveScroll: true
+    // //         })
+
+    // //         toast.add({ severity: 'success', summary: 'Item deleted', life: 2000 });
+    // //     }
+    // })
 }
 
 function processToCheckout() {

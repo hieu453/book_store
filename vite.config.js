@@ -17,4 +17,12 @@ export default defineConfig({
             },
         }),
     ],
+    server: {
+        hmr: {
+          // Set the ip only if you're using "--host" flag via cli
+          // or the server won't work on your local machine,
+          // you'll be forced to use --host every time.
+          host: process.argv.includes('--host') ? '192.168.1.109' : null
+        }
+    },
 });

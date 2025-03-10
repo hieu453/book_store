@@ -157,18 +157,25 @@
                             </span>
                         </div>
 
-                        <div
+                        <!-- <div
                             class="invisible absolute z-50 flex w-full flex-col bg-gray-100 py-1 px-4 text-gray-800 shadow-xl group-hover:visible">
-                            <a v-for="category in categories" class="my-2 block border-b border-gray-100 py-1 font-semibold text-gray-500 hover:text-black md:mx-2">
+                            <Link
+                                v-for="category in categories"
+                                class="my-2 block border-b border-gray-100 py-1 font-semibold text-gray-500 hover:text-black md:mx-2"
+                                :href="route('category.show', { slug: category.slug })"
+                                :data="{
+                                    id: category.id,
+                                    category_name: category.name,
+                                }"
+                            >
                                 {{ category.name }}
-                            </a>
-                        </div>
+                            </Link>
+                        </div> -->
                     </div>
                     <!-- Need to review -->
                     <Link v-for="(item, index) in navigation" :key="item.name" as="a" :href="item.href"
                         :class="[item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'block rounded-md px-3 py-2 text-base font-medium']"
                         :aria-current="item.current ? 'page' : undefined"
-                        @click="changeCurrent(index)"
                     >
                         {{ item.name }}
                     </Link>
@@ -176,6 +183,8 @@
             </DisclosurePanel>
         </Disclosure>
     </div>
+    <!-- <button @click="isOpen = !isOpen">test</button>
+    <div>{{ isOpen }}</div> -->
     <main>
         <slot />
     </main>
@@ -184,7 +193,7 @@
 <script setup>
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { Bars3Icon, BellIcon, XMarkIcon, ShoppingCartIcon } from '@heroicons/vue/24/outline'
-import { Link, usePage } from '@inertiajs/vue3'
+import { Link, usePage, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 
 const page = usePage();
@@ -205,6 +214,10 @@ const navigation = ref([
 
 const categories = computed(() => page.props.categories);
 const user = computed(() => page.props.auth.user);
+
+router.on('navigate', () => {
+    router.reload({ only: ['cartNumber'] })
+})
 
 function isUrl(...urls) {
     let currentUrl = page.url.substring(1)

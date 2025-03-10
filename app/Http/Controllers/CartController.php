@@ -36,20 +36,12 @@ class CartController extends Controller
         return response()->noContent();
     }
 
-    public function increaseQuantity(Request $request)
+    public function updateQuantity(Request $request)
     {
-        $cart = Cart::where('id', $request->itemId)->first();
-        $cart->quantity += 1;
-        $cart->save();
-
-        return response()->noContent();
-    }
-
-    public function decreaseQuantity(Request $request)
-    {
-        $cart = Cart::where('id', $request->itemId)->first();
-        $cart->quantity -= 1;
-        $cart->save();
+        $cart = Cart::where([
+            'user_id' => Auth::id(),
+            'id' => $request->itemId
+        ])->update(['quantity' => $request->newQuantity]);
 
         return response()->noContent();
     }
@@ -76,14 +68,6 @@ class CartController extends Controller
         return response()->noContent();
     }
 
-    public function deleteCartItems(Request $request)
-    {
-        foreach ($request->cartItems as $cartItem) {
-            Cart::destroy($cartItem['id']);
-        }
-        return redirect()->back();
-    }
-
     public function removeItems($ids)
     {
         $itemIds = [];
@@ -93,6 +77,6 @@ class CartController extends Controller
 
         Cart::destroy($itemIds);
 
-        return redirect()->back();
+        return response()->json([ 'message' => 'Items removed' ]);
     }
 }
