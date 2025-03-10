@@ -200,14 +200,12 @@ import { Head, router } from '@inertiajs/vue3';
 import { computed, onMounted, ref, useTemplateRef } from 'vue';
 
 const props = defineProps({
-    cart: {
-        type: Object,
-    },
     checkedItems: {
         type: Array,
     }
 })
 
+console.log(props.checkedItems)
 const addMoreFee = ref(false);
 
 const totalPrice = computed(() => {

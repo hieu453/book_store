@@ -121,8 +121,6 @@ const props = defineProps({
     }
 })
 
-console.log(props.products)
-
 const breadCrumb = ref([
     {
         label: 'Categories',

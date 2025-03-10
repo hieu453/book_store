@@ -16,13 +16,13 @@
                     <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                         <div class="flex shrink-0 items-center">
                             <img class="h-8 w-auto"
-                                src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=500"
+                                src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
                                 alt="Your Company" />
                         </div>
                         <div class="hidden sm:ml-6 sm:block">
                             <div class="flex space-x-4">
                                 <div class="group relative cursor-pointer">
-                                    <div class="flex justify-between text-gray-300 rounded-md space-x-2 px-3 py-2">
+                                    <div class="flex justify-between text-gray-300 hover:bg-gray-700 hover:text-white rounded-md space-x-2 px-3 py-2">
                                         <a class="menu-hover text-sm font-medium">
                                             Categories
                                         </a>
@@ -64,16 +64,7 @@
                             <span class="sr-only">View notifications</span>
                             <ShoppingCartIcon class="size-6" aria-hidden="true" />
                             <div v-if="page.props.cartNumber">
-                                <!-- Show on Cart/Index -->
                                 <div
-                                    v-if="cartNumber"
-                                    class="rounded-full absolute -top-3 left-4 text-xs bg-red-500 px-2 py-0.5 text-white"
-                                >
-                                    {{ cartNumber }}
-                                </div>
-                                <!-- Show on pages except Cart/Index -->
-                                <div
-                                    v-else
                                     class="rounded-full absolute -top-3 left-4 text-xs bg-red-500 px-2 py-0.5 text-white"
                                 >
                                     {{ page.props.cartNumber }}
@@ -145,40 +136,33 @@
             <DisclosurePanel class="sm:hidden">
                 <div class="space-y-1 px-2 pb-3 pt-2">
                     <div class="group relative cursor-pointer">
-                        <div class="flex justify-between text-gray-300 bg-gray-700 rounded-md px-3 py-2">
-                            <a class="menu-hover text-sm font-medium">
-                                Categories
-                            </a>
-                            <span>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                    stroke="currentColor" class="h-6 w-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                </svg>
-                            </span>
-                        </div>
-
-                        <!-- <div
-                            class="invisible absolute z-50 flex w-full flex-col bg-gray-100 py-1 px-4 text-gray-800 shadow-xl group-hover:visible">
-                            <Link
-                                v-for="category in categories"
-                                class="my-2 block border-b border-gray-100 py-1 font-semibold text-gray-500 hover:text-black md:mx-2"
-                                :href="route('category.show', { slug: category.slug })"
-                                :data="{
-                                    id: category.id,
-                                    category_name: category.name,
-                                }"
-                            >
-                                {{ category.name }}
-                            </Link>
-                        </div> -->
+                        <Disclosure>
+                            <DisclosureButton class="w-full">
+                                <div class="flex justify-between text-gray-300 hover:bg-gray-700 rounded-md px-3 py-2">
+                                    Categories
+                                </div>
+                            </DisclosureButton>
+                            <DisclosurePanel class="text-white">
+                                <div class="invisible absolute z-50 flex w-full flex-col bg-gray-100 py-1 px-4 text-gray-800 shadow-xl group-hover:visible">
+                                    <DisclosureButton
+                                        v-for="category in categories"
+                                        :key="category.id"
+                                        class="my-2 block border-b border-gray-100 py-1 font-semibold text-gray-500 hover:text-black md:mx-2"
+                                        :href="route('category.show', { slug: category.slug, id: category.id, category_name: category.name })"
+                                        as="a"
+                                    >
+                                        {{ category.name }}
+                                    </DisclosureButton>
+                                </div>
+                            </DisclosurePanel>
+                        </Disclosure>
                     </div>
-                    <!-- Need to review -->
-                    <Link v-for="(item, index) in navigation" :key="item.name" as="a" :href="item.href"
+                    <DisclosureButton v-for="(item, index) in navigation" :key="item.name" as="a" :href="item.href"
                         :class="[item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'block rounded-md px-3 py-2 text-base font-medium']"
                         :aria-current="item.current ? 'page' : undefined"
                     >
                         {{ item.name }}
-                    </Link>
+                    </DisclosureButton>
                 </div>
             </DisclosurePanel>
         </Disclosure>
@@ -198,14 +182,6 @@ import { computed, ref } from 'vue'
 
 const page = usePage();
 
-const cartNumber = computed(() => {
-    if (page.props.cartItems) {
-        return page.props.cartItems.reduce((acc, item) => {
-            return acc + item.quantity
-        }, 0)
-    }
-    return null;
-})
 
 const navigation = ref([
     { name: 'Home', href: route('home'), current: true },

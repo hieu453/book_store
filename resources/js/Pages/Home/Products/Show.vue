@@ -90,7 +90,7 @@
                             :disabled="disabled"
                             @click="addToCart"
                             :class="{ 'bg-indigo-900': disabled }"
-                            class="bg-indigo-600 mb-2 w-full sm:w-auto sm:mb-0 flex gap-2 items-center text-white px-6 py-2 rounded-md hover:bg-indigo-900 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            class="bg-indigo-600 mb-2 w-full sm:w-auto sm:mb-0 flex justify-center gap-2 items-center text-white px-6 py-2 rounded-md hover:bg-indigo-900 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="size-6">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -98,12 +98,12 @@
                             </svg>
                             Add to Cart
                         </button>
-                        <div class="flex space-x-4 mb-6 sm:mb-0 sm:justify-around">
+                        <div class="flex mb-6 sm:mb-0 gap-2 sm:justify-around">
                             <button
                                 :disabled="disabled"
                                 @click="buyNow"
-                                :class="{ 'bg-indigo-900': disabled }"
-                                class="flex gap-2 items-center w-full border border-indigo-600 text-indigo-600 px-6 py-2 rounded-md hover:text-white hover:bg-indigo-900 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                :class="{ 'bg-indigo-600': disabled }"
+                                class="flex justify-center items-center w-full border border-indigo-600 text-indigo-600 px-4 py-2 rounded-md hover:text-white hover:bg-indigo-600 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                     stroke="currentColor" class="size-6">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -112,7 +112,7 @@
                                 Buy now
                             </button>
                             <button
-                                class="bg-gray-200 flex gap-2 items-center  text-gray-800 px-6 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                                class="bg-gray-200 flex justify-center w-full items-center text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                     stroke="currentColor" class="size-6">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -218,6 +218,7 @@ function buyNow() {
         })
         .catch(function (error) {
             toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 2000 })
+            disabled.value = false;
         })
 }
 

@@ -215,6 +215,8 @@ const props = defineProps({
     }
 })
 
+const page = usePage();
+
 const cart = ref([])
 const toast = useToast()
 const loading = ref(false)
@@ -239,10 +241,6 @@ onMounted(() => {
             isCheckAll.value = cart.value.every(item => item.checked)
         }
     })
-})
-
-watch(checkedItems, (newCheckedItems) => {
-    isCheckAll.value = newCheckedItems.length === cart.value.length ? true : false
 })
 
 function checkItem(index) {
@@ -288,7 +286,10 @@ function updateQuantity(itemId, index, newQuantity) {
     })
         .then(res => {
             loading.value = false;
-
+            router.reload({
+                only: ['cartNumber'],
+                replace: true
+            })
         })
         .catch(error => {
             toast.add({ severity: 'error', summary: error.message, life: 2000 })
