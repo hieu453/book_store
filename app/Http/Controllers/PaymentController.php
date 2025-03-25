@@ -4,11 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Cart;
 use Inertia\Inertia;
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use App\Helpers\Payment\Momo;
-use App\Helpers\Payment\Environment;
-use App\Models\Product;
 use App\Services\PaymentService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Helpers\Payment\Environment;
+use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
 {
@@ -19,16 +24,38 @@ class PaymentController extends Controller
 
     }
 
-    public function process()
+    public function process(Request $request)
     {
+        $validatedData = $request->validate([
+            'city' => ['required'],
+            'district' => ['required'],
+            'ward' => ['required'],
+            'fullname' => ['required'],
+            'email' => ['required'],
+            'phone_number' => ['required', 'regex:/^(0|\+84|84)(\d{9,10})$/'],
+        ]);
+        session()->put('userInfo', $validatedData);
+        $totalPrice = 0;
+        foreach (session('checkedItems') as $item) {
+            $totalPrice += $item['quantity'] * $item['product']['price'];
+        }
+
         $jsonResult = Momo::process(
             new Environment(),
             "https://test-payment.momo.vn/v2/gateway/api/create",
-            "10000",
+            (string)$totalPrice * 1000,
             time()."",
             "Thanh toán qua MoMo",
             route('payment.redirect')
         );
+        if ($jsonResult['resultCode'] != 0) {
+            return redirect()->back()->with('payment_status', $jsonResult['message']);
+        }
+
+        $redirect = $this->deleteCheckedItemsAndUpdateQuantity();
+        if ($redirect) {
+            return $redirect;
+        }
 
         return Inertia::location($jsonResult['payUrl']);
     }
@@ -39,40 +66,92 @@ class PaymentController extends Controller
             return to_route('home');
         }
 
-        $this->deleteCheckedItemsAndUpdateQuantity();
-
         session()->flash('paymentDetails', $request->all());
+        session()->flash('flashCheckedItems', session('checkedItems'));
+
+        // neu forget o showcheckpage se gay ra loi khong tim thay session checkedItems
+        session()->forget('checkedItems');
 
         return to_route('payment.check');
     }
 
     public function deleteCheckedItemsAndUpdateQuantity()
     {
-        $itemIds = [];
-        foreach (session('checkedItems') as $item) {
-            $itemIds[] = $item['id'];
+        DB::beginTransaction();
 
-            $product = Product::find($item['id']);
-            if ($product->quantity > 0) {
+        try {
+            $itemIds = [];
+            foreach (session('checkedItems') as $item) {
+                $itemIds[] = $item['id'];
+                $product = Product::find($item['product_id']);
+                if ($product->quantity < 1 || $product->quantity < $item['quantity']) {
+                    DB::rollBack();
+                    return to_route('cart')->with('update_quantity_error', 'Quantity in stock is not enough!');
+                }
+
                 $product->quantity = $product->quantity - $item['quantity'];
                 $product->save();
             }
-        }
 
-        session()->forget('checkedItems');
-        Cart::destroy($itemIds);
+            Cart::destroy($itemIds);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Some error: ' . $e->getMessage());
+
+            return to_route('cart')->with('update_quantity_error', 'Quantity in stock is not enough!');
+        }
     }
 
     public function showCheckPage()
     {
+        session()->keep(['paymentDetails', 'flashCheckedItems']);
         // Order flash data
-        if (session('paymentDetails')) {
-            // Need to return view check status
-            // dd($this->payment->handlePaymentStatusCode(session('paymentDetails')['resultCode']));
-            echo 'need to add a status page';
-            return;
-        }
+        if (session()->has('paymentDetails')) {
+            $paymentDetails = session('paymentDetails');
+            $checkedItems = session('flashCheckedItems');
+            $isOrderExisted = Order::where('order_id', $paymentDetails['orderId'])->first();
 
+
+            if ($paymentDetails['resultCode'] == 0 && !$isOrderExisted) {
+                $totalQuantity = 0;
+                $totalPrice = 0;
+                foreach ($checkedItems as $item) {
+                    $totalQuantity += $item['quantity'];
+                    $totalPrice += $item['quantity'] * $item['product']['price'];
+                }
+
+                $order = new Order;
+                $order->order_id = $paymentDetails['orderId'];
+                $order->user_id = Auth::id();
+                $order->fullname = session('userInfo')['fullname'];
+                $order->email = session('userInfo')['email'];
+                $order->phone_number = session('userInfo')['phone_number'];
+                $order->city = session('userInfo')['city'];
+                $order->district = session('userInfo')['district'];
+                $order->ward = session('userInfo')['ward'];
+                $order->quantity = $totalQuantity;
+                $order->total_price = $totalPrice;
+                $order->payment_mode = 'online';
+                $order->save();
+
+                foreach ($checkedItems as $item) {
+                    $orderItem = new OrderItem;
+                    $orderItem->order_id = $order->order_id;
+                    $orderItem->product_id = $item['product_id'];
+                    $orderItem->quantity = $item['quantity'];
+                    $orderItem->price = $item['product']['price'];
+                    $orderItem->save();
+                }
+            }
+            $handledResult = $this->payment->handlePaymentStatusCode($paymentDetails['resultCode']);
+            return Inertia::render('Home/PaymentStatus/Index', [
+                'message' => $handledResult['message'],
+                'icon_url' => $handledResult['icon'],
+                'code' => $handledResult['code'],
+                'order' => Order::where('order_id', $paymentDetails['orderId'])->with('orderItems.product')->first(),
+            ]);
+        }
         return to_route('home');
     }
 }

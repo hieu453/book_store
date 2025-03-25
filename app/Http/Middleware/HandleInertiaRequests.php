@@ -38,6 +38,10 @@ class HandleInertiaRequests extends Middleware
             ],
             'categories' => Category::all(),
             'cartNumber' => $request->user() ? Cart::where('user_id', $request->user()->id)->sum('quantity') : null,
+            'flash' => [
+                'payment_status' => fn () => $request->session()->get('payment_status'),
+                'update_quantity_error' => fn () => $request->session()->get('update_quantity_error'),
+            ]
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Models\Cart;
 use Inertia\Inertia;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Helpers\Payment\Momo;
 use App\Helpers\Payment\Environment;
@@ -13,6 +14,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\WishlistController;
 
 // dev routes
 Route::get('/session-flush', function () {
@@ -21,15 +23,15 @@ Route::get('/session-flush', function () {
 });
 
 Route::get('/test', function (Request $request) {
-    dd(session('checkedItems'));
+    $order = Order::where('order_id', '1742534743')->with('orderItems.product')->first();
 
-    $itemIds = [];
-    foreach (session('checkedItems') as $item) {
-        $itemIds[] = $item['id'];
-    }
-
-    Cart::destroy($itemIds);
-    return to_route('home');
+    return Inertia::render('Home/PaymentStatus/Success', [
+        'url' => asset('status_icons/success_icon.svg'),
+        'order' => $order,
+    ]);
+});
+Route::get('/test2', function (Request $request) {
+    session()->forget('paymentDetails');
 });
 
 // Home routes
@@ -61,6 +63,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/payment', [PaymentController::class, 'process'])->name('payment');
     Route::get('/payment/redirect-success', [PaymentController::class, 'redirectCheckPayment'])->name('payment.redirect');
     Route::get('/payment/check', [PaymentController::class, 'showCheckPage'])->name('payment.check');
+
+
+    // Wishlist routes
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
+    Route::post('/wishlist/add', [WishlistController::class, 'add'])->name('wishlist.add');
+    Route::get('/wislist/get-is-added/{productId}', [WishlistController::class, 'getIsAdded'])->name('wishlist.get');
 });
 
 // Dashboard and Profile

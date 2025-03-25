@@ -168,7 +168,7 @@
 
                             <div class="flex items-center justify-center gap-2">
                                 <span class="text-sm font-normal text-gray-500 dark:text-gray-400"> or </span>
-                                <a href="#" title=""
+                                <Link :href="route('home')" title=""
                                     class="inline-flex items-center gap-2 text-sm font-medium text-primary-700 underline hover:no-underline dark:text-primary-500">
                                     Continue Shopping
                                     <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -176,7 +176,7 @@
                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                             stroke-width="2" d="M19 12H5m14 0-4 4m4-4-4-4" />
                                     </svg>
-                                </a>
+                                </Link>
                             </div>
                         </div>
 
@@ -204,10 +204,10 @@
 </template>
 
 <script setup>
-import { Head, router, WhenVisible, usePage } from '@inertiajs/vue3';
+import { Head, router, WhenVisible, usePage, Link } from '@inertiajs/vue3';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
-import { computed, onMounted, ref, toRaw, watch } from 'vue';
+import { computed, onMounted, ref, toRaw } from 'vue';
 
 const props = defineProps({
     cartItems: {
@@ -241,6 +241,10 @@ onMounted(() => {
             isCheckAll.value = cart.value.every(item => item.checked)
         }
     })
+
+    if (page.props.flash.update_quantity_error) {
+        toast
+    }
 })
 
 function checkItem(index) {
@@ -275,8 +279,15 @@ function checkAll() {
         })
 }
 
+console.log(props.cartItems)
 function updateQuantity(itemId, index, newQuantity) {
     const oldQuantity = props.cartItems[index].quantity;
+
+    if (props.cartItems[index].product.quantity < newQuantity) {
+        cart.value[index].quantity = props.cartItems[index].product.quantity;
+        return;
+    }
+
     cart.value[index].quantity = newQuantity;
     loading.value = true;
 
@@ -317,16 +328,6 @@ function removeItems(items) {
         .catch(err => {
             toast.add({ severity: 'error', summary: err.message, life: 2000 });
         })
-    // // router.delete(route('cart.remove.items', { ids: itemIds }), {
-    // //     preserveScroll: true,
-    // //     onSuccess: () => {
-    // //         router.get(route('cart'), {}, {
-    // //             preserveScroll: true
-    // //         })
-
-    // //         toast.add({ severity: 'success', summary: 'Item deleted', life: 2000 });
-    // //     }
-    // })
 }
 
 function processToCheckout() {

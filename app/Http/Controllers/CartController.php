@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cart;
 use Inertia\Inertia;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,18 +20,23 @@ class CartController extends Controller
     public function addToCart(Request $request)
     {
         $cartItem = Cart::where('product_id', $request->product['productId'])->first();
+        $product = Product::where('id', $request->product['productId'])->first();
 
-        if ($cartItem) {
-            $cartItem->quantity += $request->product['quantity'];
-            $cartItem->checked = $request->product['checked'] ?? false;
-            $cartItem->save();
+        if ($product->quantity > 0) {
+            if ($cartItem) {
+                $cartItem->quantity += $request->product['quantity'];
+                $cartItem->checked = $request->product['checked'] ?? false;
+                $cartItem->save();
+            } else {
+                $cart = new Cart;
+                $cart->product_id = $request->product['productId'];
+                $cart->user_id = $request->product['userId'];
+                $cart->checked = $request->product['checked'] ?? false;
+                $cart->quantity = $request->product['quantity'];
+                $cart->save();
+            }
         } else {
-            $cart = new Cart;
-            $cart->product_id = $request->product['productId'];
-            $cart->user_id = $request->product['userId'];
-            $cart->checked = $request->product['checked'] ?? false;
-            $cart->quantity = $request->product['quantity'];
-            $cart->save();
+            return response()->json(status: 400);
         }
 
         return response()->noContent();
@@ -38,7 +44,7 @@ class CartController extends Controller
 
     public function updateQuantity(Request $request)
     {
-        $cart = Cart::where([
+        Cart::where([
             'user_id' => Auth::id(),
             'id' => $request->itemId
         ])->update(['quantity' => $request->newQuantity]);

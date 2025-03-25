@@ -81,7 +81,7 @@
                     </div>
                     <div class="mb-6">
                         <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantity:</label>
-                        <input ref="quantity-input" type="number" id="quantity" name="quantity" min="1" value="1"
+                        <input ref="quantity-input" type="number" id="quantity" name="quantity" min="1" value="1" step="1" :max="product.quantity"
                             class="w-12 text-center rounded-md border-gray-300  shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                     </div>
                     <div class="sm:flex sm:space-x-4 sm:mb-6">
@@ -98,12 +98,12 @@
                             </svg>
                             Add to Cart
                         </button>
-                        <div class="flex mb-6 sm:mb-0 gap-2 sm:justify-around">
+                        <div class="flex mb-6 sm:mb-0 gap-4 justify-between">
                             <button
                                 :disabled="disabled"
                                 @click="buyNow"
-                                :class="{ 'bg-indigo-600': disabled }"
-                                class="flex justify-center items-center w-full border border-indigo-600 text-indigo-600 px-4 py-2 rounded-md hover:text-white hover:bg-indigo-600 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2">
+                                :class="{ 'bg-indigo-600 text-white': disabled }"
+                                class="flex justify-center items-center w-full gap-2 border border-indigo-600 text-indigo-600 px-4 py-2 sm:px-6 sm:py-0 rounded-md hover:text-white hover:bg-indigo-600 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                     stroke="currentColor" class="size-6">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -112,8 +112,15 @@
                                 Buy now
                             </button>
                             <button
-                                class="bg-gray-200 flex justify-center w-full items-center text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                :disabled="disabled"
+                                @click="addToWishlist"
+                                class="bg-gray-200 flex justify-center items-center gap-2 text-gray-800 rounded-md px-4 py-2 sm:px-6 sm:py-0 hover:bg-gray-300 focus:outline-none focus:ring-2 disabled:cursor-not-allowed focus:ring-gray-500 focus:ring-offset-2">
+                                <svg v-if="isAddedToWishlist" xmlns="http://www.w3.org/2000/svg" fill="true" viewBox="0 0 24 24" stroke-width="1.5"
+                                    stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                                </svg>
+                                <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                     stroke="currentColor" class="size-6">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
@@ -139,15 +146,12 @@ import { Head, router, usePage } from '@inertiajs/vue3';
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
-import { computed, onMounted, ref, useTemplateRef } from 'vue';
+import { computed, onBeforeMount, onMounted, ref, useTemplateRef } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
-    product: {
-        type: Object,
-    }
+    product: Object,
 })
-
 const page = usePage();
 const breadCrumb = ref([
     {
@@ -164,6 +168,18 @@ const toast = useToast()
 const quantityInput = useTemplateRef('quantity-input')
 const user = computed(() => page.props.auth.user)
 const productCart = ref({})
+const isAddedToWishlist = ref(false);
+
+onBeforeMount(async () => {
+    if (user.value) {
+        try {
+            const res = await axios.get(route('wishlist.get', { productId: props.product.id }));
+            isAddedToWishlist.value = res.data
+        } catch (error) {
+            console.log(error.message)
+        }
+    }
+})
 
 // khoi tao gia tri cho 1 san pham (de user thay doi so luong se thay doi theo)
 if (user.value != null) {
@@ -176,6 +192,10 @@ if (user.value != null) {
 
 onMounted(() => {
     quantityInput.value.onchange = function (e) {
+        if (this.value < 1) {
+            this.value = 1;
+        }
+
         productCart.value.quantity = parseInt(this.value);
     }
 })
@@ -198,8 +218,11 @@ function addToCart() {
                 case 401:
                     toast.add({ severity: 'info', summary: 'Info', detail: 'You need to log in to add to cart', life: 2000 })
                     break;
+                case 400:
+                    toast.add({ severity: 'info', summary: 'Info', detail: 'Quantity is not enough!', life: 2000 })
+                    break;
                 default:
-                    toast.add({ severity: 'info', summary: 'Info', detail: 'There are some errors', life: 2000 })
+                    toast.add({ severity: 'info', summary: 'Info', detail: error.message, life: 2000 })
                     break;
             }
         })
@@ -217,9 +240,30 @@ function buyNow() {
             router.get(route('cart'))
         })
         .catch(function (error) {
-            toast.add({ severity: 'error', summary: 'Error', detail: error.message, life: 2000 })
             disabled.value = false;
+
+            switch (error.status) {
+                case 401:
+                    toast.add({ severity: 'info', summary: 'Info', detail: 'You need to log in to buy now', life: 2000 })
+                    break;
+                case 400:
+                    toast.add({ severity: 'info', summary: 'Info', detail: 'Quantity is not enough!', life: 2000 })
+                    break;
+                default:
+                    toast.add({ severity: 'info', summary: 'Info', detail: error.message, life: 2000 })
+                    break;
+            }
         })
+}
+
+async function addToWishlist() {
+    try {
+        const res = await axios.post(route('wishlist.add', { productId: props.product.id }))
+        isAddedToWishlist.value = !isAddedToWishlist.value
+        toast.add({ severity: 'success', summary: res.data.message, life: 2000 })
+    } catch (error) {
+        console.log(error.message)
+    }
 }
 
 </script>
