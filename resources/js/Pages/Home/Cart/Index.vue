@@ -279,7 +279,6 @@ function checkAll() {
         })
 }
 
-console.log(props.cartItems)
 function updateQuantity(itemId, index, newQuantity) {
     const oldQuantity = props.cartItems[index].quantity;
 

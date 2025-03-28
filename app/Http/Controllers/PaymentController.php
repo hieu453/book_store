@@ -9,31 +9,38 @@ use App\Models\Product;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use App\Helpers\Payment\Momo;
+use Illuminate\Validation\Rule;
 use App\Services\PaymentService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\Payment\Environment;
+use App\Services\ProvinceService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class PaymentController extends Controller
 {
     public function __construct(
-        protected PaymentService $payment
+        protected PaymentService $payment,
+        protected ProvinceService $province,
     )
-    {
+    {}
 
-    }
 
     public function process(Request $request)
     {
+        $provincesData = $this->province->getProvinces();
+
         $validatedData = $request->validate([
-            'city' => ['required'],
-            'district' => ['required'],
-            'ward' => ['required'],
+            'city' => ['required', Rule::in($provincesData['cities'])],
+            'district' => ['required', Rule::in($provincesData['districts'])],
+            'ward' => ['required', Rule::in($provincesData['wards'])],
             'fullname' => ['required'],
             'email' => ['required'],
             'phone_number' => ['required', 'regex:/^(0|\+84|84)(\d{9,10})$/'],
         ]);
+
         session()->put('userInfo', $validatedData);
         $totalPrice = 0;
         foreach (session('checkedItems') as $item) {
@@ -52,7 +59,7 @@ class PaymentController extends Controller
             return redirect()->back()->with('payment_status', $jsonResult['message']);
         }
 
-        $redirect = $this->deleteCheckedItemsAndUpdateQuantity();
+        $redirect = $this->updateQuantity();
         if ($redirect) {
             return $redirect;
         }
@@ -75,7 +82,7 @@ class PaymentController extends Controller
         return to_route('payment.check');
     }
 
-    public function deleteCheckedItemsAndUpdateQuantity()
+    public function updateQuantity()
     {
         DB::beginTransaction();
 
@@ -145,7 +152,7 @@ class PaymentController extends Controller
                 }
             }
             $handledResult = $this->payment->handlePaymentStatusCode($paymentDetails['resultCode']);
-            return Inertia::render('Home/PaymentStatus/Index', [
+            return Inertia::render('Home/Payment/Online', [
                 'message' => $handledResult['message'],
                 'icon_url' => $handledResult['icon'],
                 'code' => $handledResult['code'],

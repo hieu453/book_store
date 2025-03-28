@@ -111,19 +111,20 @@
                                     placeholder="Enter your phone number" />
                                 <span v-if="errors.phone_number" class="text-red-600">{{ errors.phone_number }}</span>
                             </div>
-                            <div v-if="form.errors">{{ form.errors }}</div>
                         </div>
                     </div>
 
                     <div class="space-y-4">
                         <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Payment</h3>
-
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                             <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 ps-4 dark:border-gray-700 dark:bg-gray-800">
                                 <div class="flex items-start">
                                     <div class="flex h-5 items-center">
-                                        <input id="pay-on-delivery" aria-describedby="pay-on-delivery-text" type="radio"
-                                            name="payment-method" value="delivery"
+                                        <input
+                                            v-model="form.paymentMethod"
+                                            aria-describedby="pay-on-delivery-text"
+                                            type="radio"
+                                            value="cod"
                                             class="h-4 w-4 border-gray-300 bg-white text-primary-600 focus:ring-2 focus:ring-primary-600 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-primary-600" />
                                     </div>
 
@@ -136,24 +137,17 @@
                                         </p>
                                     </div>
                                 </div>
-
-                                <div class="mt-4 flex items-center gap-2">
-                                    <button type="button"
-                                        class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">Delete</button>
-
-                                    <div class="h-3 w-px shrink-0 bg-gray-200 dark:bg-gray-700"></div>
-
-                                    <button type="button"
-                                        class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">Edit</button>
-                                </div>
                             </div>
 
                             <div
                                 class="rounded-lg border border-gray-200 bg-gray-50 p-4 ps-4 dark:border-gray-700 dark:bg-gray-800">
                                 <div class="flex items-start">
                                     <div class="flex h-5 items-center">
-                                        <input id="paypal-2" aria-describedby="paypal-text" type="radio"
-                                            name="payment-method" value=""
+                                        <input
+                                            v-model="form.paymentMethod"
+                                            aria-describedby="paypal-text"
+                                            type="radio"
+                                            value="online"
                                             class="h-4 w-4 border-gray-300 bg-white text-primary-600 focus:ring-2 focus:ring-primary-600 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-primary-600" />
                                     </div>
 
@@ -165,16 +159,6 @@
                                             Connect to your account
                                         </p>
                                     </div>
-                                </div>
-
-                                <div class="mt-4 flex items-center gap-2">
-                                    <button type="button"
-                                        class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">Delete</button>
-
-                                    <div class="h-3 w-px shrink-0 bg-gray-200 dark:bg-gray-700"></div>
-
-                                    <button type="button"
-                                        class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">Edit</button>
                                 </div>
                             </div>
                         </div>
@@ -239,12 +223,14 @@ const form = reactive({
     city: "",
     district: "",
     ward: "",
+    paymentMethod: 'cod'
 })
+console.log(props.errors.ward)
+const addMoreFee = ref(false);
 
 const city = computed(() => props.provinces.find(province => province.name == form.city))
 const district = computed(() => city.value ? city.value.districts.find(district => district.name == form.district) : null)
 
-const addMoreFee = ref(false);
 const toast = useToast();
 
 const totalPrice = computed(() => {
@@ -254,6 +240,8 @@ const totalPrice = computed(() => {
 })
 
 const fee = computed(() => {
+    addMoreFee.value = form.paymentMethod == "cod" ? true : false;
+
     return addMoreFee.value ? 15 : 0;
 })
 
@@ -261,27 +249,34 @@ const totalCheckoutPrice = computed(() => {
     return totalPrice.value + fee.value
 })
 
-onMounted(async () => {
-    const paymentMethod = document.querySelectorAll("input[name='payment-method']")
-    paymentMethod.forEach((el) => {
-        el.onchange = function (e) {
-            this.value == 'delivery' ? addMoreFee.value = true : addMoreFee.value = false;
-        }
-    })
-})
-
 function processToPayment() {
-    router.post(route('payment'), form, {
-        preserveState: true,
-        onSuccess: (page) => {
-            if (page.props.flash.payment_status) {
-                toast.add({ severity: 'info', summary: page.props.flash.payment_status, life: 4000 });
-            }
+    if (form.paymentMethod == 'online') {
+        router.post(route('payment.online'), form, {
+            preserveState: true,
+            onSuccess: (page) => {
+                if (page.props.flash.payment_status) {
+                    toast.add({ severity: 'info', summary: page.props.flash.payment_status, life: 4000 });
+                }
 
-            if (page.props.flash.update_quantity_error) {
-                toast.add({ severity: 'error', summary: page.props.flash.update_quantity_error, life: 4000 });
+                if (page.props.flash.update_quantity_error) {
+                    toast.add({ severity: 'error', summary: page.props.flash.update_quantity_error, life: 4000 });
+                }
             }
-        }
-    })
+        })
+    } else {
+        console.log(form)
+        router.post(route('payment.online'), form, {
+            preserveState: true,
+            onSuccess: (page) => {
+                if (page.props.flash.payment_status) {
+                    toast.add({ severity: 'info', summary: page.props.flash.payment_status, life: 4000 });
+                }
+
+                if (page.props.flash.update_quantity_error) {
+                    toast.add({ severity: 'error', summary: page.props.flash.update_quantity_error, life: 4000 });
+                }
+            }
+        })
+    }
 }
 </script>

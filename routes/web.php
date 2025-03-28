@@ -60,7 +60,7 @@ Route::middleware('auth')->group(function () {
 
 
     // Payment routes
-    Route::post('/payment', [PaymentController::class, 'process'])->name('payment');
+    Route::post('/payment/online', [PaymentController::class, 'process'])->name('payment.online');
     Route::get('/payment/redirect-success', [PaymentController::class, 'redirectCheckPayment'])->name('payment.redirect');
     Route::get('/payment/check', [PaymentController::class, 'showCheckPage'])->name('payment.check');
 
