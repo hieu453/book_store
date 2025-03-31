@@ -225,7 +225,6 @@ const form = reactive({
     ward: "",
     paymentMethod: 'cod'
 })
-console.log(props.errors.ward)
 const addMoreFee = ref(false);
 
 const city = computed(() => props.provinces.find(province => province.name == form.city))
@@ -249,6 +248,10 @@ const totalCheckoutPrice = computed(() => {
     return totalPrice.value + fee.value
 })
 
+onMounted(() => {
+    router.reload({ only: ['checkedItems'] })
+})
+
 function processToPayment() {
     if (form.paymentMethod == 'online') {
         router.post(route('payment.online'), form, {
@@ -264,14 +267,9 @@ function processToPayment() {
             }
         })
     } else {
-        console.log(form)
-        router.post(route('payment.online'), form, {
+        router.post(route('payment.cod'), form, {
             preserveState: true,
             onSuccess: (page) => {
-                if (page.props.flash.payment_status) {
-                    toast.add({ severity: 'info', summary: page.props.flash.payment_status, life: 4000 });
-                }
-
                 if (page.props.flash.update_quantity_error) {
                     toast.add({ severity: 'error', summary: page.props.flash.update_quantity_error, life: 4000 });
                 }

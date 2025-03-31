@@ -12,16 +12,12 @@ class CheckoutController extends Controller
     public function index()
     {
         if (! session()->has('checkedItems')) {
-            return redirect()->back();
+            return to_route('home');
         }
 
-        try {
-            $provinces = Cache::remember('provinces', 180, function () {
-                return Http::get('https://provinces.open-api.vn/api/?depth=3')->json();
-            });
-        } catch (\Exception $e) {
-            dd($e);
-        }
+        $provinces = Cache::remember('provinces', 180, function () {
+            return Http::get('https://provinces.open-api.vn/api/?depth=3')->json();
+        });
 
         return Inertia::render('Home/Cart/Checkout', [
             'checkedItems' => session('checkedItems'),

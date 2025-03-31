@@ -6,12 +6,15 @@ use App\Models\Product;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class WishlistController extends Controller
 {
     public function index()
     {
-
+        return Inertia::render('Home/Wishlist/Index', [
+            'wishlists' => Wishlist::where('user_id', Auth::id())->with('product.category')->paginate(12),
+        ]);
     }
 
     public function add(Request $request)
@@ -28,10 +31,5 @@ class WishlistController extends Controller
         $wishlist->save();
 
         return response()->json(['message' => 'Product added to wishlist!']);
-    }
-
-    public function getIsAdded(int $productId)
-    {
-        return Wishlist::where('product_id', $productId)->where('user_id', Auth::id())->first() ? true : false;
     }
 }

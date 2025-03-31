@@ -2,36 +2,51 @@
     <div class="container px-4 py-8 mx-auto">
         <Head title="Products" />
         <Breadcrumb :data="breadCrumb" />
-        <WhenVisible data="permissions" :buffer="500">
-            <template #fallback>
-                <DataView :value="products.data" layout="grid">
-                    <template #grid>
-                        <div class="grid md:grid-cols-3">
-                            <div v-for="i in 12" :key="i" class="col-12 sm:col-6 lg:col-12 xl:col-4 p-2">
-                                <div class="p-4 border-1 surface-border surface-card border-round">
-                                    <div class="flex flex-wrap align-items-center justify-content-between gap-2">
-                                        <Skeleton class="w-6rem border-round h-2rem" />
-                                        <Skeleton class="w-3rem border-round h-1rem" />
-                                    </div>
-                                    <div class="flex flex-column align-items-center gap-3 py-5">
-                                        <Skeleton class="w-9 border-round h-10rem" />
-                                        <Skeleton class="w-8rem border-round h-2rem" />
-                                        <Skeleton class="w-6rem border-round h-1rem" />
-                                    </div>
-                                    <div class="flex align-items-center justify-content-between">
-                                        <Skeleton class="w-4rem border-round h-2rem" />
-                                        <Skeleton shape="circle" class="w-3rem h-3rem" />
+        <div class="mt-3 flex space-x-2">
+            <div class="w-1/3">
+                <div>
+                    <h1 class="text-lg font-bold">Filter</h1>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold">Price:</h1>
+                    <select v-model="price" @change="filter">
+                        <option value="">Select to filter based on price</option>
+                        <option :value="priceOrder.asc">Low to high</option>
+                        <option :value="priceOrder.desc">High to low</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <WhenVisible data="permissions" :buffer="500">
+                <template #fallback>
+                    <DataView :value="products.data" layout="grid">
+                        <template #grid>
+                            <div class="grid md:grid-cols-3">
+                                <div v-for="i in 9" :key="i" class="col-12 sm:col-6 lg:col-12 xl:col-4 p-2">
+                                    <div class="p-4 border-1 surface-border surface-card border-round">
+                                        <div class="flex flex-wrap align-items-center justify-content-between gap-2">
+                                            <Skeleton class="w-6rem border-round h-2rem" />
+                                            <Skeleton class="w-3rem border-round h-1rem" />
+                                        </div>
+                                        <div class="flex flex-column align-items-center gap-3 py-5">
+                                            <Skeleton class="w-9 border-round h-10rem" />
+                                            <Skeleton class="w-8rem border-round h-2rem" />
+                                            <Skeleton class="w-6rem border-round h-1rem" />
+                                        </div>
+                                        <div class="flex align-items-center justify-content-between">
+                                            <Skeleton class="w-4rem border-round h-2rem" />
+                                            <Skeleton shape="circle" class="w-3rem h-3rem" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </template>
-                </DataView>
-            </template>
+                        </template>
+                    </DataView>
+                </template>
 
-            <div class="mt-2">
                 <div v-if="products.data.length > 0">
-                    <div class="grid md:grid-cols-4 gap-4">
+                    <div class="grid md:grid-cols-3 gap-4">
                         <div v-for="product in products.data" :key="product.id">
                             <Card style="overflow: hidden;">
                                 <template #header>
@@ -59,7 +74,7 @@
                             </Card>
                         </div>
                     </div>
-                    <Pagination :products="products" class="mt-2" />
+                    <Pagination :products="products" :route="route('products')" :query="{ price }" class="mt-2" />
                 </div>
                 <div
                     v-else
@@ -69,20 +84,19 @@
                         <h1 class="text-2xl">No products</h1>
                     </div>
                 </div>
-            </div>
-        </WhenVisible>
+            </WhenVisible>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { Head, WhenVisible, Link } from '@inertiajs/vue3';
+import { Head, WhenVisible, Link, router } from '@inertiajs/vue3';
 import DataView from 'primevue/dataview';
-import Select from 'primevue/select';
 import Skeleton from 'primevue/skeleton';
 import Card from 'primevue/card';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import Pagination from '@/Components/Pagination.vue';
-import { ref } from 'vue';
+import { reactive, ref } from 'vue';
 
 const props = defineProps({
     products: {
@@ -96,24 +110,19 @@ const breadCrumb = ref([
     }
 ])
 
-const sortKey = ref();
-const sortOrder = ref();
-const sortField = ref();
+const price = ref('')
+const priceOrder = reactive({
+    asc: 'asc',
+    desc: 'desc',
+})
 
-const onSortChange = (event) => {
-    const value = event.value.value;
-    const sortValue = event.value;
 
-    if (value.indexOf('!') === 0) {
-        sortOrder.value = -1;
-        sortField.value = value.substring(1, value.length);
-        sortKey.value = sortValue;
-    }
-    else {
-        sortOrder.value = 1;
-        sortField.value = value;
-        sortKey.value = sortValue;
-    }
-};
-
+function filter() {
+    router.get(route('products'), {
+        price: price.value
+    }, {
+        preserveState: true
+    })
+    // console.log(query.price)
+}
 </script>

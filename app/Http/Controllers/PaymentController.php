@@ -27,6 +27,73 @@ class PaymentController extends Controller
     )
     {}
 
+    public function processCod(Request $request)
+    {
+        $provincesData = $this->province->getProvinces();
+
+        $validatedData = $request->validate([
+            'city' => ['required', Rule::in($provincesData['cities'])],
+            'district' => ['required', Rule::in($provincesData['districts'])],
+            'ward' => ['required', Rule::in($provincesData['wards'])],
+            'fullname' => ['required'],
+            'email' => ['required'],
+            'phone_number' => ['required', 'regex:/^(0|\+84|84)(\d{9,10})$/'],
+        ]);
+
+        $totalPrice = 0;
+        $totalQuantity = 0;
+        $checkedItems = session('checkedItems');
+
+        foreach ($checkedItems as $item) {
+            $totalQuantity += $item['quantity'];
+            $totalPrice += $item['quantity'] * $item['product']['price'];
+        }
+
+        $order = new Order;
+        $order->order_id = time()."";
+        $order->user_id = Auth::id();
+        $order->fullname = $validatedData['fullname'];
+        $order->email = $validatedData['email'];
+        $order->phone_number = $validatedData['phone_number'];
+        $order->city = $validatedData['city'];
+        $order->district = $validatedData['district'];
+        $order->ward = $validatedData['ward'];
+        $order->quantity = $totalQuantity;
+        $order->total_price = $totalPrice;
+        $order->payment_mode = 'cod';
+        $order->save();
+
+        foreach ($checkedItems as $item) {
+            $orderItem = new OrderItem;
+            $orderItem->order_id = $order->order_id;
+            $orderItem->product_id = $item['product_id'];
+            $orderItem->quantity = $item['quantity'];
+            $orderItem->price = $item['product']['price'];
+            $orderItem->save();
+        }
+
+        $this->updateQuantity();
+        session()->forget('checkedItems');
+
+        session()->flash('orderId', $order->order_id);
+
+        return to_route('payment.cod.success');
+    }
+
+    public function showSuccessCodPage()
+    {
+        session()->keep(['orderId']);
+
+        if (session('orderId')) {
+            return Inertia::render('Home/Payment/Cod', [
+                'message' => 'You ordered',
+                'icon_url' => asset('status_icons/success_icon.svg'),
+                'order' => Order::where('order_id', session('orderId'))->with('orderItems.product')->first(),
+            ]);
+        }
+
+        return to_route('home');
+    }
 
     public function process(Request $request)
     {

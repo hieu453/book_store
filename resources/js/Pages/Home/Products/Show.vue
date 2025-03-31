@@ -81,8 +81,17 @@
                     </div>
                     <div class="mb-6">
                         <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantity:</label>
-                        <input ref="quantity-input" type="number" id="quantity" name="quantity" min="1" value="1" step="1" :max="product.quantity"
-                            class="w-12 text-center rounded-md border-gray-300  shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        <input
+                            ref="quantity-input"
+                            type="number"
+                            id="quantity"
+                            name="quantity"
+                            min="1"
+                            value="1"
+                            step="1"
+                            :max="product.quantity"
+                            :disabled="product.quantity == 0"
+                            :class="[ product.quantity == 0 ? 'opacity-50' : '', 'w-12 text-center rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' ]">
                     </div>
                     <div class="sm:flex sm:space-x-4 sm:mb-6">
                         <Toast />
@@ -115,7 +124,7 @@
                                 :disabled="disabled"
                                 @click="addToWishlist"
                                 class="bg-gray-200 flex justify-center items-center gap-2 text-gray-800 rounded-md px-4 py-2 sm:px-6 sm:py-0 hover:bg-gray-300 focus:outline-none focus:ring-2 disabled:cursor-not-allowed focus:ring-gray-500 focus:ring-offset-2">
-                                <svg v-if="isAddedToWishlist" xmlns="http://www.w3.org/2000/svg" fill="true" viewBox="0 0 24 24" stroke-width="1.5"
+                                <svg v-if="initialInWishlist" xmlns="http://www.w3.org/2000/svg" fill="true" viewBox="0 0 24 24" stroke-width="1.5"
                                     stroke="currentColor" class="size-6">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
@@ -151,6 +160,7 @@ import axios from 'axios';
 
 const props = defineProps({
     product: Object,
+    isInWishlist: Boolean,
 })
 const page = usePage();
 const breadCrumb = ref([
@@ -168,18 +178,9 @@ const toast = useToast()
 const quantityInput = useTemplateRef('quantity-input')
 const user = computed(() => page.props.auth.user)
 const productCart = ref({})
-const isAddedToWishlist = ref(false);
+const initialInWishlist = ref(props.isInWishlist);
+// console.log(initialInWishlist)
 
-onBeforeMount(async () => {
-    if (user.value) {
-        try {
-            const res = await axios.get(route('wishlist.get', { productId: props.product.id }));
-            isAddedToWishlist.value = res.data
-        } catch (error) {
-            console.log(error.message)
-        }
-    }
-})
 
 // khoi tao gia tri cho 1 san pham (de user thay doi so luong se thay doi theo)
 if (user.value != null) {
@@ -259,8 +260,11 @@ function buyNow() {
 async function addToWishlist() {
     try {
         const res = await axios.post(route('wishlist.add', { productId: props.product.id }))
-        isAddedToWishlist.value = !isAddedToWishlist.value
+        initialInWishlist.value = !initialInWishlist.value
         toast.add({ severity: 'success', summary: res.data.message, life: 2000 })
+        router.reload({
+            only: ['isInWishlist']
+        })
     } catch (error) {
         console.log(error.message)
     }

@@ -1,14 +1,14 @@
 <template>
     <ul class="space-x-2 flex justify-center items-center">
         <Link
-            :href="route('products')"
-            :data="{ page: 1 }"
+            :href="products.first_page_url"
             :class="[
                 products.current_page == 1
                 ? 'pointer-events-none opacity-20'
                 : 'hover:bg-slate-500 hover:text-white'
                 , 'rounded-full w-10 h-10 flex items-center justify-center'
             ]"
+            preserve-state
         >
             <i class="pi pi-angle-double-left"></i>
         </Link>
@@ -20,14 +20,18 @@
                 || pageNumber == products.last_page"
             >
                 <Link
-                    :href="route('products')"
-                    :data="{ page: pageNumber }"
+                    :href="route"
+                    :data="{
+                        page: pageNumber,
+                        ...query,
+                    }"
                     :class="[
                         pageNumber == products.current_page
                             ? 'text-white bg-purple-400'
                             : 'hover:bg-slate-500 hover:text-white transition ease-in-out'
                             , 'rounded-full w-10 h-10 flex items-center justify-center'
                     ]"
+                    preserve-state
                 >
                     {{ pageNumber }}
                 </Link>
@@ -35,14 +39,14 @@
             <span v-if="pageNumber == 1 && Math.abs(pageNumber - products.current_page) > centerNumber">...</span>
         </template>
          <Link
-            :href="route('products')"
-            :data="{ page: products.last_page }"
+            :href="products.last_page_url"
             :class="[
                 products.current_page == products.last_page
                 ? 'pointer-events-none opacity-20'
                 : 'hover:bg-slate-500 hover:text-white'
                 , 'rounded-full w-10 h-10 flex items-center justify-center'
             ]"
+            preserve-state
          >
             <i class="pi pi-angle-double-right"></i>
         </Link>
@@ -53,10 +57,10 @@
 import { Link } from '@inertiajs/vue3';
 
 const props = defineProps({
-    products: {
-        type: Object,
-    }
+    products: Object,
+    route: String,
+    query: Object,
 })
-
+console.log(props.query)
 const centerNumber = 3;
 </script>

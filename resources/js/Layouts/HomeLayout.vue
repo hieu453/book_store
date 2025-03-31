@@ -13,7 +13,7 @@
                             <XMarkIcon v-else class="block size-6" aria-hidden="true" />
                         </DisclosureButton>
                     </div>
-                    <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+                    <div class="flex items-center justify-center sm:items-stretch sm:justify-start">
                         <div class="flex shrink-0 items-center">
                             <img class="h-8 w-auto"
                                 src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
@@ -54,6 +54,28 @@
                             </div>
                         </div>
                     </div>
+                    <div class="flex flex-1">
+                        <form class="max-w-lg mx-auto" @submit.prevent="searchProduct">
+                            <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                                    </svg>
+                                </div>
+                                <input type="search" v-model="keyword" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search products" required />
+                                <button type="submit" class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
+
+                                <!-- <div class="absolute bg-gray-100 rounded-md w-auto">
+                                    <ul>
+                                        <li>los</li>
+                                        <li>world</li>
+                                        <li>yeye</li>
+                                    </ul>
+                                </div> -->
+                            </div>
+                        </form>
+                    </div>
                     <div class="absolute inset-y-0 right-0 flex gap-2 items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                         <Link
                             type="button"
@@ -61,7 +83,7 @@
                             class="relative group rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none"
                         >
                             <span class="absolute -inset-1.5" />
-                            <span class="sr-only">View notifications</span>
+                            <span class="sr-only">View cart</span>
                             <ShoppingCartIcon class="size-6" aria-hidden="true" />
                             <div v-if="page.props.cartNumber">
                                 <div
@@ -99,13 +121,13 @@
                                 <MenuItems
                                     class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
                                     <MenuItem v-slot="{active}">
-                                        <a
-                                            href="#"
+                                        <Link
+                                            :href="route('profile.edit')"
                                             :class="[active ? 'bg-gray-100 outline-none' : '', 'block px-4 py-2 text-sm text-gray-700']"
                                         >
                                             <i class="pi pi-user"></i>
                                             Your Profile
-                                        </a>
+                                        </Link>
                                     </MenuItem>
                                     <MenuItem v-slot="{active}">
                                         <a
@@ -117,13 +139,13 @@
                                         </a>
                                     </MenuItem>
                                     <MenuItem v-slot="{active}">
-                                        <a
-                                            href="#"
+                                        <Link
+                                            :href="route('wishlist')"
                                             :class="[active ? 'bg-gray-100 outline-none' : '', 'block px-4 py-2 text-sm text-gray-700']"
                                         >
                                             <i class="pi pi-heart"></i>
                                             Wishlists
-                                        </a>
+                                        </Link>
                                     </MenuItem>
                                     <MenuItem v-slot="{active}">
                                         <Link
@@ -187,7 +209,7 @@
 
 
 
-    <footer class="bg-gray-100 dark:bg-gray-900">
+    <footer class="bg-gray-100 dark:bg-gray-900 min-h-screen">
         <div class="mx-auto w-full max-w-screen-xl">
         <div class="grid grid-cols-2 gap-8 px-4 py-6 lg:py-8 md:grid-cols-4">
             <div>
@@ -311,6 +333,8 @@ const navigation = ref([
     { name: 'Products', href: route('products'), current: false },
 ]);
 
+const keyword = ref('')
+
 const categories = computed(() => page.props.categories);
 const user = computed(() => page.props.auth.user);
 
@@ -324,5 +348,11 @@ function isUrl(...urls) {
         return currentUrl === ''
     }
     return urls.filter((url) => currentUrl.startsWith(url)).length
+}
+
+function searchProduct() {
+    router.get(route('home'), {
+        keyword: keyword.value,
+    })
 }
 </script>

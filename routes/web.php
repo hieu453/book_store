@@ -61,6 +61,8 @@ Route::middleware('auth')->group(function () {
 
     // Payment routes
     Route::post('/payment/online', [PaymentController::class, 'process'])->name('payment.online');
+    Route::post('/payment/cod', [PaymentController::class, 'processCod'])->name('payment.cod');
+    Route::get('/payment/cod/success', [PaymentController::class, 'showSuccessCodPage'])->name('payment.cod.success');
     Route::get('/payment/redirect-success', [PaymentController::class, 'redirectCheckPayment'])->name('payment.redirect');
     Route::get('/payment/check', [PaymentController::class, 'showCheckPage'])->name('payment.check');
 
@@ -68,7 +70,6 @@ Route::middleware('auth')->group(function () {
     // Wishlist routes
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
     Route::post('/wishlist/add', [WishlistController::class, 'add'])->name('wishlist.add');
-    Route::get('/wislist/get-is-added/{productId}', [WishlistController::class, 'getIsAdded'])->name('wishlist.get');
 });
 
 // Dashboard and Profile
