@@ -10,7 +10,6 @@
                 <div>
                     <h1 class="text-lg font-bold">Price:</h1>
                     <select v-model="price" @change="filter">
-                        <option value="">Select to filter based on price</option>
                         <option :value="priceOrder.asc">Low to high</option>
                         <option :value="priceOrder.desc">High to low</option>
                     </select>
@@ -74,7 +73,7 @@
                             </Card>
                         </div>
                     </div>
-                    <Pagination :products="products" :route="route('products')" :query="{ price }" class="mt-2" />
+                    <Pagination :links="products.links" class="mt-2" />
                 </div>
                 <div
                     v-else
@@ -99,10 +98,10 @@ import Pagination from '@/Components/Pagination.vue';
 import { reactive, ref } from 'vue';
 
 const props = defineProps({
-    products: {
-        type: Object,
-    }
+    products: Object,
+    filters: Object,
 })
+
 
 const breadCrumb = ref([
     {
@@ -110,19 +109,15 @@ const breadCrumb = ref([
     }
 ])
 
-const price = ref('')
+const price = ref(props.filters.price)
 const priceOrder = reactive({
     asc: 'asc',
     desc: 'desc',
 })
 
-
 function filter() {
     router.get(route('products'), {
         price: price.value
-    }, {
-        preserveState: true
     })
-    // console.log(query.price)
 }
 </script>

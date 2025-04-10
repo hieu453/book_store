@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('ward');
             $table->integer('quantity');
             $table->float('total_price');
-            $table->enum('status', ['pending', 'completed', 'failed'])->default('pending');
+            $table->enum('status', ['pending', 'processing', 'completed', 'failed'])->default('pending');
             $table->enum('payment_mode', ['online', 'cod']);
             $table->timestamps();
         });

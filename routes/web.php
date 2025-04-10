@@ -3,18 +3,26 @@
 use App\Models\Cart;
 use Inertia\Inertia;
 use App\Models\Order;
+use App\Models\Review;
 use Illuminate\Http\Request;
 use App\Helpers\Payment\Momo;
 use App\Helpers\Payment\Environment;
+use App\Http\Controllers\Admin\AdminCategoryController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminProductController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\WishlistController;
+use App\Models\Product;
 
 // dev routes
 Route::get('/session-flush', function () {
@@ -23,12 +31,7 @@ Route::get('/session-flush', function () {
 });
 
 Route::get('/test', function (Request $request) {
-    $order = Order::where('order_id', '1742534743')->with('orderItems.product')->first();
-
-    return Inertia::render('Home/PaymentStatus/Success', [
-        'url' => asset('status_icons/success_icon.svg'),
-        'order' => $order,
-    ]);
+    return Product::with('category')->paginate(10);
 });
 Route::get('/test2', function (Request $request) {
     session()->forget('paymentDetails');
@@ -36,6 +39,7 @@ Route::get('/test2', function (Request $request) {
 
 // Home routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/search', [HomeController::class, 'search'])->name('home.search');
 
 // Category routes
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
@@ -70,7 +74,41 @@ Route::middleware('auth')->group(function () {
     // Wishlist routes
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
     Route::post('/wishlist/add', [WishlistController::class, 'add'])->name('wishlist.add');
+
+
+    // Review routes
+    Route::post('/reviews', function (Request $request) {
+        $review = new Review;
+        $review->content = $request->reviewContent;
+        $review->user_id = Auth::id();
+        $review->product_id = $request->productId;
+
+        $review->save();
+    })->name('reviews.add');
+    Route::post('/reviews/{reviewId}/like', [ReviewController::class, 'toggleLike'])->name('reviews.toggleLike');
+
+
+    // Order routes
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders');
 });
+
+
+// Admin routes
+Route::middleware(['auth', 'is_admin'])->prefix('admin')->group(function () {
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+
+
+    // Category routes
+    Route::get('/categories', [AdminCategoryController::class, 'index'])->name('admin.categories');
+    Route::get('/categories/create', [AdminCategoryController::class, 'create'])->name('admin.categories.create');
+    Route::post('/categories', [AdminCategoryController::class, 'store'])->name('admin.categories.store');
+    Route::get('/categories/{categoryId}/edit', [AdminCategoryController::class, 'edit'])->name('admin.categories.edit');
+    Route::put('/categories/{categoryId}/update', [AdminCategoryController::class, 'update'])->name('admin.categories.update');
+
+
+    Route::get('/products', [AdminProductController::class, 'index'])->name('admin.products');
+});
+
 
 // Dashboard and Profile
 Route::get('/dashboard', function () {

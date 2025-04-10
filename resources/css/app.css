@@ -1,6 +1,10 @@
+@import 'form';
+@import 'button';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 
 @layer components {
     .btn {

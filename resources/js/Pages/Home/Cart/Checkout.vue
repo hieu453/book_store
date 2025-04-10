@@ -145,17 +145,17 @@
                                     <div class="flex h-5 items-center">
                                         <input
                                             v-model="form.paymentMethod"
-                                            aria-describedby="paypal-text"
+                                            aria-describedby="momo-text"
                                             type="radio"
                                             value="online"
                                             class="h-4 w-4 border-gray-300 bg-white text-primary-600 focus:ring-2 focus:ring-primary-600 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-primary-600" />
                                     </div>
 
                                     <div class="ms-4 text-sm">
-                                        <label for="paypal-2" class="font-medium leading-none text-gray-900 dark:text-white">
-                                            Paypal account
+                                        <label for="momo-2" class="font-medium leading-none text-gray-900 dark:text-white">
+                                            Momo account
                                         </label>
-                                        <p id="paypal-text" class="mt-1 text-xs font-normal text-gray-500 dark:text-gray-400">
+                                        <p id="momo-text" class="mt-1 text-xs font-normal text-gray-500 dark:text-gray-400">
                                             Connect to your account
                                         </p>
                                     </div>

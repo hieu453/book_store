@@ -146,6 +146,8 @@
                     </p>
                 </div>
             </div>
+
+            <Review :reviews="reviews" :product="product" />
         </div>
     </div>
 </template>
@@ -155,12 +157,14 @@ import { Head, router, usePage } from '@inertiajs/vue3';
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
-import { computed, onBeforeMount, onMounted, ref, useTemplateRef } from 'vue';
+import Review from '@/Components/Review.vue';
+import { computed, onMounted, ref, useTemplateRef } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
     product: Object,
     isInWishlist: Boolean,
+    reviews: Object
 })
 const page = usePage();
 const breadCrumb = ref([
@@ -179,7 +183,6 @@ const quantityInput = useTemplateRef('quantity-input')
 const user = computed(() => page.props.auth.user)
 const productCart = ref({})
 const initialInWishlist = ref(props.isInWishlist);
-// console.log(initialInWishlist)
 
 
 // khoi tao gia tri cho 1 san pham (de user thay doi so luong se thay doi theo)
@@ -266,7 +269,14 @@ async function addToWishlist() {
             only: ['isInWishlist']
         })
     } catch (error) {
-        console.log(error.message)
+        switch (error.status) {
+            case 401:
+                toast.add({ severity: 'info', summary: 'Info', detail: 'You need to log in to add to wishlist', life: 2000 })
+                break;
+            default:
+                toast.add({ severity: 'info', summary: 'Info', detail: error.message, life: 2000 })
+                break;
+        }
     }
 }
 

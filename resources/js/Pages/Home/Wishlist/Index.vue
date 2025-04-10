@@ -56,7 +56,7 @@
                             </Card>
                         </div>
                     </div>
-                    <Pagination :products="wishlists" :route="route('wishlist')" class="mt-2" />
+                    <Pagination :products="wishlists" class="mt-2" />
                 </div>
                 <div v-else class="h-screen text-center content-center">
                     <div class="px-5 py-5 max-w-sm mx-auto border rounded-lg">
