@@ -39,7 +39,7 @@
                 </Link>
 
                 <Link :href="route('admin.categories')" class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
-                    :class="[ page.url === '/admin/categories' ? activeClass : inactiveClass ]"
+                    :class="[ page.url.startsWith('/admin/categories') ? activeClass : inactiveClass ]"
                 >
                     <svg class="w-5 h-5" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -60,7 +60,7 @@
                 </Link>
 
                 <Link :href="route('admin.products')" class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
-                    :class="[ page.url === '/admin/products' ? activeClass : inactiveClass ]"
+                    :class="[ page.url.startsWith('/admin/products') ? activeClass : inactiveClass ]"
                 >
                     <svg class="w-5 h-5" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path

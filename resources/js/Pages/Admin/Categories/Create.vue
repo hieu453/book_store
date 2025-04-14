@@ -13,7 +13,7 @@
                 </div>
                 <div class="flex items-center justify-end px-8 py-4 bg-gray-50 border-t border-gray-100">
                     <LoadingButton :loading="form.processing" class="btn-indigo" type="submit">Create
-                        Organization</LoadingButton>
+                        Category</LoadingButton>
                 </div>
             </form>
         </div>

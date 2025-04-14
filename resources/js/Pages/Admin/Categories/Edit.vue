@@ -100,4 +100,12 @@ function update() {
         },
     })
 }
+
+function destroy() {
+    router.delete(route('admin.categories.destroy', { categoryId: props.category.id }), {
+        onSuccess: () => {
+            toast.add({ severity: 'success', summary: page.props.flash.success, life: 2000 })
+        }
+    })
+}
 </script>

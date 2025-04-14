@@ -12,8 +12,8 @@
             </div>
             <div class="bg-white rounded-md shadow overflow-x-auto">
                 <DataTable
-                    :value="categories.data"
-                    v-model:selection="selectedProducts"
+                    :value="categories"
+                    v-model:selection="selectedCategories"
                     v-model:filters="filters"
                     filterDisplay="row"
                     :globalFilterFields="['name', 'created_at', 'updated_at']"
@@ -73,7 +73,7 @@ defineProps({
     categories: Object,
 })
 
-const selectedProducts = ref()
+const selectedCategories = ref()
 
 const filters = ref({
     name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },

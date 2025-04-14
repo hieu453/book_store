@@ -13,7 +13,7 @@ class AdminCategoryController extends Controller
     public function index()
     {
         return Inertia::render('Admin/Categories/Index', [
-            'categories' => Category::paginate(12),
+            'categories' => Category::all(),
         ]);
     }
 
@@ -55,6 +55,13 @@ class AdminCategoryController extends Controller
         $category->save();
 
         return back()->with('success', 'Category updated');
+    }
+
+    public function destroy($categoryId)
+    {
+        Category::destroy($categoryId);
+
+        return to_route('admin.categories')->with('success', 'Category deleted');
     }
 
 }

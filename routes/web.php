@@ -104,9 +104,15 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->group(function () {
     Route::post('/categories', [AdminCategoryController::class, 'store'])->name('admin.categories.store');
     Route::get('/categories/{categoryId}/edit', [AdminCategoryController::class, 'edit'])->name('admin.categories.edit');
     Route::put('/categories/{categoryId}/update', [AdminCategoryController::class, 'update'])->name('admin.categories.update');
+    Route::delete('/categories/{categoryId}', [AdminCategoryController::class, 'destroy'])->name('admin.categories.destroy');
 
 
     Route::get('/products', [AdminProductController::class, 'index'])->name('admin.products');
+    Route::get('/products/create', [AdminProductController::class, 'create'])->name('admin.products.create');
+    Route::post('/products', [AdminProductController::class, 'store'])->name('admin.products.store');
+    Route::get('/products/{productId}/edit', [AdminProductController::class, 'edit'])->name('admin.products.edit');
+    Route::put('/products/{productId}/update', [AdminProductController::class, 'update'])->name('admin.products.update');
+    Route::delete('/products/{productId}/destroy', [AdminProductController::class, 'destroy'])->name('admin.products.destroy');
 });
 
 
