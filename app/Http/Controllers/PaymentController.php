@@ -180,6 +180,7 @@ class PaymentController extends Controller
     public function showCheckPage()
     {
         session()->keep(['paymentDetails', 'flashCheckedItems']);
+        //dd(session('paymentDetails'));
         // Order flash data
         if (session()->has('paymentDetails')) {
             $paymentDetails = session('paymentDetails');
@@ -204,6 +205,7 @@ class PaymentController extends Controller
                 $order->city = session('userInfo')['city'];
                 $order->district = session('userInfo')['district'];
                 $order->ward = session('userInfo')['ward'];
+                $order->trans_id = $paymentDetails['transId'];
                 $order->quantity = $totalQuantity;
                 $order->total_price = $totalPrice;
                 $order->payment_mode = 'online';

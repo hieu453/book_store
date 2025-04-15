@@ -1,6 +1,6 @@
 <template>
     <div>
-        <ul class="flex space-x-2">
+        <ul class="flex space-x-2 items-center py-2 justify-center">
             <template v-for="link in links">
                 <li
                     v-if="link.label === '...'"
@@ -13,7 +13,7 @@
                 >
                     <Link
                         :href="link.url"
-                        :class="[link.active ? 'text-red-600' : '', 'px-4 py-2 bg-purple-700 rounded-full text-white']"
+                        :class="[link.active ? 'text-red-600' : 'text-white', 'px-4 py-2 bg-purple-700 rounded-full']"
                     >
                         <span v-html="link.label"></span>
                     </Link>

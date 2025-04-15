@@ -15,7 +15,7 @@ class CheckoutController extends Controller
             return to_route('home');
         }
 
-        $provinces = Cache::remember('provinces', 180, function () {
+        $provinces = Cache::remember('provinces', 512, function () {
             return Http::get('https://provinces.open-api.vn/api/?depth=3')->json();
         });
 

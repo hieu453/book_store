@@ -16,7 +16,7 @@
                     v-model:selection="selectedProducts"
                     v-model:filters="filters"
                     filterDisplay="row"
-                    :globalFilterFields="['name', 'author', 'publisher']"
+                    :globalFilterFields="['name' ,'author', 'language', 'publisher']"
                     sortMode="multiple"
                     paginator
                     :rows="5"

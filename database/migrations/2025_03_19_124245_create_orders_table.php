@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('city');
             $table->string('district');
             $table->string('ward');
+            $table->string('trans_id')->nullable();
             $table->integer('quantity');
             $table->float('total_price');
             $table->enum('status', ['pending', 'processing', 'completed', 'failed'])->default('pending');

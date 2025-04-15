@@ -59,15 +59,36 @@
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                                         </svg>
                                     </div>
-                                    <input type="search" v-model="keyword" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search products" required />
+                                    <input type="search" v-model="keyword" autocomplete="off" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search products" required />
                                     <button type="submit" class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
-                                    <!-- <div class="absolute bg-gray-100 rounded-md w-auto">
-                                        <ul>
-                                            <li>los</li>
-                                            <li>world</li>
-                                            <li>yeye</li>
+                                    <div  v-if="products.length > 0" class="bg-white absolute rounded-md w-full">
+                                        <div v-if="isSearching" class="loading-indicator border-gray-200 rounded-lg dark:bg-neutral-800 dark:border-neutral-700">
+                                            Đang tìm kiếm...
+                                        </div>
+                                        <ul class="bg-white border border-gray-200 rounded-lg dark:bg-neutral-800 dark:border-neutral-700">
+                                            <li v-for="product in products" class="p-4 border-b hover:bg-slate-100">
+                                                <Link :href="route('product.show', { slug: product.slug, id: product.id })">
+                                                    <div class="flex justify-between items-center">
+                                                        <div class="flex items-center gap-2">
+                                                            <img class="w-10 h-10" src="https://flowbite.s3.amazonaws.com/blocks/e-commerce/apple-watch-light.svg" alt="">
+                                                            <div>
+                                                                <p class="font-bold">{{ product.category.name }}</p>
+                                                                <span v-html="highlightKeyword(product.name)"></span>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <span>{{ product.price }}$</span>
+                                                        </div>
+                                                    </div>
+                                                </Link>
+                                            </li>
+                                            <Link :href="route('home.search')" :data="{ keyword }">
+                                                <p class="text-center hover:bg-slate-100">
+                                                    View all results
+                                                </p>
+                                            </Link>
                                         </ul>
-                                    </div> -->
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -313,7 +334,8 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { Bars3Icon, BellIcon, XMarkIcon, ShoppingCartIcon } from '@heroicons/vue/24/outline'
 import { Link, usePage, router } from '@inertiajs/vue3'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import debounce from 'lodash/debounce'
 
 const page = usePage();
 const props = defineProps({
@@ -326,14 +348,25 @@ const navigation = ref([
     { name: 'Products', href: route('products'), current: false },
 ]);
 
+const isSearching = ref(false)
 const keyword = ref(props.filters ? props.filters.keyword : '')
-
+const products = ref([])
 const categories = computed(() => page.props.categories);
 const user = computed(() => page.props.auth.user);
 
 router.on('navigate', () => {
     router.reload({ only: ['cartNumber'] })
+    products.value = []
 })
+
+watch(keyword, debounce(async function (newKeyword) {
+    isSearching.value = true;
+
+    const res = await axios.get(route('product.search', { keyword: newKeyword }))
+    products.value = res.data.products
+
+    isSearching.value = false;
+}, 250));
 
 function isUrl(...urls) {
     let currentUrl = page.url.substring(1)
@@ -347,5 +380,19 @@ function searchProduct() {
     router.get(route('home.search'), {
         keyword: keyword.value,
     })
+}
+
+function capitalize(s)
+{
+    return String(s[0]).toUpperCase() + String(s).slice(1);
+}
+
+function highlightKeyword(productName) {
+    const regex = new RegExp(`${keyword.value}`, 'gi')
+
+    return productName.replace(
+        regex,
+        `<mark class="text-red-500">${keyword.value[0] === productName[0].toLowerCase() ? capitalize(keyword.value) : keyword.value}</mark>`
+    )
 }
 </script>

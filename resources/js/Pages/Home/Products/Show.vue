@@ -159,7 +159,6 @@ import Toast from 'primevue/toast';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import Review from '@/Components/Review.vue';
 import { computed, onMounted, ref, useTemplateRef } from 'vue';
-import axios from 'axios';
 
 const props = defineProps({
     product: Object,

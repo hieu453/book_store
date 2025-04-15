@@ -9,6 +9,7 @@ use App\Helpers\Payment\Momo;
 use App\Helpers\Payment\Environment;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminProductController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -47,6 +48,7 @@ Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('categ
 // Product routes
 Route::get('/products', [ProductController::class, 'index'])->name('products');
 Route::get('/product/{slug}/{id}', [ProductController::class, 'show'])->name('product.show');
+Route::get('/product/{keyword?}', [ProductController::class, 'liveSearch'])->name('product.search');
 
 // Cart routes
 Route::middleware('auth')->group(function () {
@@ -107,12 +109,20 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->group(function () {
     Route::delete('/categories/{categoryId}', [AdminCategoryController::class, 'destroy'])->name('admin.categories.destroy');
 
 
+    // Product routes
     Route::get('/products', [AdminProductController::class, 'index'])->name('admin.products');
     Route::get('/products/create', [AdminProductController::class, 'create'])->name('admin.products.create');
     Route::post('/products', [AdminProductController::class, 'store'])->name('admin.products.store');
     Route::get('/products/{productId}/edit', [AdminProductController::class, 'edit'])->name('admin.products.edit');
     Route::put('/products/{productId}/update', [AdminProductController::class, 'update'])->name('admin.products.update');
     Route::delete('/products/{productId}/destroy', [AdminProductController::class, 'destroy'])->name('admin.products.destroy');
+
+
+    // Order routes
+    Route::get('/orders', [AdminOrderController::class, 'index'])->name('admin.orders');
+    Route::get('/orders/{orderId}/edit', [AdminOrderController::class, 'edit'])->name('admin.orders.edit');
+    Route::put('/orders/{orderId}/update', [AdminOrderController::class, 'update'])->name('admin.orders.update');
+
 });
 
 

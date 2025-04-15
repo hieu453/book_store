@@ -20,7 +20,6 @@ class ProductController extends Controller
                 })
                 ->paginate(9)->withQueryString(),
             'filters' => $request->only(['price']),
-
         ]);
     }
 
@@ -31,5 +30,14 @@ class ProductController extends Controller
             'isInWishlist' => Wishlist::where('product_id', $id)->where('user_id', Auth::id())->first() ? true : false,
             'reviews' => Review::with('likes', 'user')->get(),
         ]);
+    }
+
+    public function liveSearch(?string $keyword = null)
+    {
+        $products = [];
+        if ($keyword) {
+            $products = Product::with('category')->where('name', 'LIKE', "%{$keyword}%")->take(5)->get();
+        }
+        return response()->json(['products' => $products]);
     }
 }
