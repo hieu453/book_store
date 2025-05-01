@@ -2,12 +2,12 @@
     <Dashboard>
         <Toast />
         <div>
-            <Head title="Products" />
-            <h1 class="mb-8 text-3xl font-bold">Products</h1>
+            <Head title="Sản phẩm" />
+            <h1 class="mb-8 text-3xl font-bold">Sản phẩm</h1>
             <div class="flex items-center justify-between mb-6">
                 <Link class="btn-indigo" :href="route('admin.products.create')">
-                    <span>Create</span>
-                    <span class="hidden md:inline">&nbsp;Products</span>
+                    <span>Thêm</span>
+                    <span class="hidden md:inline">&nbsp;Sản phẩm</span>
                 </Link>
             </div>
             <div class="bg-white rounded-md shadow overflow-x-auto">
@@ -24,42 +24,42 @@
                     selectionMode="single"
                     @rowSelect="onRowSelect"
                 >
-                    <template #empty> No products found. </template>
+                    <template #empty> Chưa có sản phẩm nào. </template>
 
-                    <Column field="name" header="Name" style="min-width: 12rem">
+                    <Column field="name" header="Tên" style="min-width: 12rem">
                         <template #body="{data}">
                             {{ data.name }}
                         </template>
                         <template #filter="{filterModel, filterCallback}">
                             <InputText v-model="filterModel.value" type="text" @input="filterCallback()"
-                                placeholder="Search by name" />
+                                placeholder="Tìm theo tên" />
                         </template>
                     </Column>
-                    <Column field="author" header="Author" style="min-width: 12rem">
+                    <Column field="author" header="Tác giả" style="min-width: 12rem">
                         <template #body="{data}">
                             {{ data.author }}
                         </template>
                         <template #filter="{filterModel, filterCallback}">
                             <InputText v-model="filterModel.value" type="text" @input="filterCallback()"
-                                placeholder="Search by author" />
+                                placeholder="Tìm theo tác giả" />
                         </template>
                     </Column>
-                    <Column field="language" header="Language" style="min-width: 12rem">
+                    <Column field="language" header="Ngôn ngữ" style="min-width: 12rem">
                         <template #body="{data}">
                             {{ data.language }}
                         </template>
                         <template #filter="{filterModel, filterCallback}">
                             <InputText v-model="filterModel.value" type="text" @input="filterCallback()"
-                                placeholder="Search by language" />
+                                placeholder="Tìm theo ngôn ngữ" />
                         </template>
                     </Column>
-                    <Column field="publisher" header="Publisher" style="min-width: 12rem">
+                    <Column field="publisher" header="Nhà xuất bản" style="min-width: 12rem">
                         <template #body="{data}">
                             {{ data.publisher }}
                         </template>
                         <template #filter="{filterModel, filterCallback}">
                             <InputText v-model="filterModel.value" type="text" @input="filterCallback()"
-                                placeholder="Search by publisher" />
+                                placeholder="Tìm theo nhà xuất bản" />
                         </template>
                     </Column>
                 </DataTable>

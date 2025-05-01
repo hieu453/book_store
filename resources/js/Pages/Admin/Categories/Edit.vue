@@ -4,7 +4,7 @@
         <Head :title="form.name" />
         <div>
             <h1 class="mb-8 text-3xl font-bold">
-                <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.categories')">Categories</Link>
+                <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.categories')">Danh mục</Link>
                 <span class="text-indigo-400 font-medium">/</span>
                 {{ form.name }}
             </h1>
@@ -23,10 +23,10 @@
                             type="button"
                             @click="destroy"
                         >
-                            Delete Category
+                            Xóa danh mục
                         </button>
-                        <LoadingButton :loading="form.processing" class="btn-indigo ml-auto" type="submit">Update
-                            Category</LoadingButton>
+                        <LoadingButton :loading="form.processing" class="btn-indigo ml-auto" type="submit">Cập nhật
+                            danh mục</LoadingButton>
                     </div>
                 </form>
             </div>

@@ -1,6 +1,7 @@
 import '../css/app.css';
 import './bootstrap';
 import 'primeicons/primeicons.css'
+import "quill/dist/quill.snow.css";
 
 import { createInertiaApp } from '@inertiajs/vue3';
 import { createApp, h } from 'vue';
@@ -24,7 +25,13 @@ createInertiaApp({
             .use(ZiggyVue)
             .use(PrimeVue, {
                 theme: {
-                    preset: Aura
+                    preset: Aura,
+                    options: {
+                        cssLayer: {
+                            name: 'primevue',
+                            order: 'tailwind, primevue'
+                        }
+                    }
                 },
             })
             .use(ToastService)

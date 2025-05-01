@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use Inertia\Inertia;
 use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Support\Str;
+use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Auth\Events\Validated;
+use Illuminate\Support\Facades\Storage;
 
 class AdminProductController extends Controller
 {
@@ -19,7 +23,9 @@ class AdminProductController extends Controller
 
     public function create()
     {
-        return Inertia::render('Admin/Products/Create');
+        return Inertia::render('Admin/Products/Create', [
+            'categories' => Category::all(),
+        ]);
     }
 
     public function store(Request $request)
@@ -30,12 +36,15 @@ class AdminProductController extends Controller
             'language' => ['required', 'max:255'],
             'width' => ['required', 'min:1'],
             'height' => ['required', 'min:1'],
+            'category_id' => ['required'],
             'weight' => ['required', 'min:1'],
             'price' => ['required', 'min:1'],
             'quantity' => ['required', 'min:0'],
+            'images' => ['required'],
             'publisher' => ['required', 'max:255'],
             'published_date' => ['required'],
         ]);
+
 
         $product = new Product;
         $product->name = $validatedData['name'];
@@ -45,19 +54,38 @@ class AdminProductController extends Controller
         $product->width = $validatedData['width'];
         $product->height = $validatedData['height'];
         $product->weight = $validatedData['weight'];
+        $product->category_id = $validatedData['category_id'];
         $product->price = $validatedData['price'];
         $product->quantity = $validatedData['quantity'];
         $product->publisher = $validatedData['publisher'];
         $product->published_date = $validatedData['published_date'];
         $product->save();
 
-        return to_route('admin.products')->with('success', 'Product added');
+        foreach ($request->images as $image) {
+            $image_name = $image->hashName();
+
+            $product_images = new ProductImage;
+            $product_images->product_id = $product->id;
+            $product_images->image_name = $image_name;
+            $product_images->save();
+
+            Storage::disk('public')->putFileAs("/product_images/product_{$product->id}", $image, $image_name);
+        }
+
+        return to_route('admin.products')->with('success', 'Đã thêm sản phẩm.');
     }
 
     public function edit($productId)
     {
+        $product = Product::with('images')->where('id', $productId)->first();
+
+        foreach ($product->images as $image) {
+            $image->url = $image->getImage();
+        }
+
         return Inertia::render('Admin/Products/Edit', [
-            'product' => Product::find($productId),
+            'product' => $product,
+            'categories' => Category::all(),
         ]);
     }
 
@@ -71,6 +99,7 @@ class AdminProductController extends Controller
             'weight' => ['required', 'min:1'],
             'price' => ['required', 'min:1'],
             'quantity' => ['required', 'min:0'],
+            'category_id' => ['required'],
             'publisher' => ['required', 'max:255'],
             'published_date' => ['required'],
         ]);
@@ -82,6 +111,7 @@ class AdminProductController extends Controller
         $product->language = $validatedData['language'];
         $product->width = $validatedData['width'];
         $product->height = $validatedData['height'];
+        $product->category_id = $validatedData['category_id'];
         $product->weight = $validatedData['weight'];
         $product->price = $validatedData['price'];
         $product->quantity = $validatedData['quantity'];
@@ -89,13 +119,31 @@ class AdminProductController extends Controller
         $product->published_date = $validatedData['published_date'];
         $product->save();
 
-        return back()->with('success', 'Product updated');
+        if ($request->images) {
+            foreach ($product->images as $image) {
+                Storage::disk('public')->delete("/product_images/product_{$product->id}/$image->image_name");
+                $image->delete();
+            }
+
+            foreach ($request->images as $image) {
+                $image_name = $image->hashName();
+
+                $product_images = new ProductImage;
+                $product_images->product_id = $product->id;
+                $product_images->image_name = $image_name;
+                $product_images->save();
+
+                Storage::disk('public')->putFileAs("/product_images/product_{$product->id}", $image, $image_name);
+            }
+        }
+
+        return back()->with('success', 'Đã cập nhật sản phẩm.');
     }
 
     public function destroy($productId)
     {
         Product::destroy($productId);
 
-        return to_route('admin.products')->with('success', 'Product deleted');
+        return to_route('admin.products')->with('success', 'Đã xóa sản phẩm.');
     }
 }

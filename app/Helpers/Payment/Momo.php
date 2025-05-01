@@ -56,4 +56,37 @@ class Momo
 
         return json_decode($result, true);  // decode json
     }
+
+    public static function refund(
+        Environment $env,
+        $orderId,
+        $requestId,
+        $amount,
+        $transId,
+    )
+    {
+        $endpoint = "https://test-payment.momo.vn/v2/gateway/api/refund";
+
+        $description = "";
+        $lang = "vi";
+
+        $rawHash = "accessKey={$env->accessKey}&amount={$amount}&description={$description}&orderId={$orderId}&partnerCode={$env->partnerCode}&requestId={$requestId}&transId={$transId}";
+
+        $signature = hash_hmac("sha256", $rawHash, $env->secretKey);
+
+        $data = array(
+            "partnerCode" => "{$env->partnerCode}",
+            "orderId" => "{$orderId}",
+            "requestId" => "{$requestId}",
+            "amount" => $amount,
+            "transId" => $transId,
+            "lang" => $lang,
+            "description" => $description,
+            "signature" => $signature,
+        );
+
+        $result = Curl::execPostRequest($endpoint, json_encode($data));
+
+        return json_decode($result, true);  // decode json
+    }
 }

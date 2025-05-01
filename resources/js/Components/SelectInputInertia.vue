@@ -1,15 +1,17 @@
 <template>
     <div :class="$attrs.class">
-        <label class="form-label">Status</label>
+        <label class="form-label">Trạng thái đơn hàng</label>
         <select @change="emit('update:modelValue', $event.target.value)">
-            <option v-for="s in status" :value="s" :selected="s === order.status">{{ s }}</option>
+            <option v-for="(v, k) in status" :value="k" :selected="k === order.status">
+                {{ v }}
+            </option>
         </select>
         <div v-if="error" class="form-error">{{ error }}</div>
     </div>
 </template>
 <script setup>
 const props = defineProps({
-    status: Array,
+    status: Object,
     order: Object,
     selectedStatus: String,
     modelValue: String,

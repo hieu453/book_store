@@ -22,7 +22,7 @@ class WishlistController extends Controller
         $productInWishlist = Wishlist::where('product_id', $request->get('productId'))->where('user_id', Auth::id())->first();
         if ($productInWishlist) {
             Wishlist::destroy($productInWishlist->id);
-            return response()->json(['message' => 'Product was removed from wishlist!']);
+            return response()->json(['message' => 'Đã xóa sản phẩm khỏi danh sách yêu thích!']);
         }
 
         $wishlist = new Wishlist;
@@ -30,6 +30,6 @@ class WishlistController extends Controller
         $wishlist->product_id = $request->get('productId');
         $wishlist->save();
 
-        return response()->json(['message' => 'Product added to wishlist!']);
+        return response()->json(['message' => 'Đã thêm sản phẩm vào danh sách yêu thích!']);
     }
 }

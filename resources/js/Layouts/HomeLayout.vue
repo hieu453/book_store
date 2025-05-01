@@ -25,7 +25,7 @@
                                     <div class="group relative cursor-pointer">
                                         <div class="flex justify-between text-gray-300 hover:bg-gray-700 hover:text-white rounded-md space-x-2 px-3 py-2">
                                             <a class="menu-hover text-sm font-medium">
-                                                Categories
+                                                Danh mục
                                             </a>
                                             <span>
                                                 <i class="pi pi-bars"></i>
@@ -41,16 +41,22 @@
                                             </Link>
                                         </div>
                                     </div>
-                                    <Link v-for="(item, index) in navigation" :key="item.name" :href="item.href"
-                                        :class="[isUrl(item.name.toLowerCase()) ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'rounded-md px-3 py-2 text-sm font-medium']"
-                                        :aria-current="item.current ? 'page' : undefined"
+                                    <Link
+                                        :href="route('home')"
+                                        :class="[page.url === '/' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'rounded-md px-3 py-2 text-sm font-medium']"
                                     >
-                                        {{ item.name }}
+                                        Trang chủ
+                                    </Link>
+                                    <Link
+                                        :href="route('products')"
+                                        :class="[page.url.startsWith('/products') ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'rounded-md px-3 py-2 text-sm font-medium']"
+                                    >
+                                        Sản phẩm
                                     </Link>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex flex-1">
+                        <div class="md:flex md:flex-1 hidden">
                             <form class="w-2/3 mx-auto" @submit.prevent="searchProduct">
                                 <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
                                 <div class="relative">
@@ -59,9 +65,9 @@
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                                         </svg>
                                     </div>
-                                    <input type="search" v-model="keyword" autocomplete="off" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search products" required />
-                                    <button type="submit" class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
-                                    <div  v-if="products.length > 0" class="bg-white absolute rounded-md w-full">
+                                    <input type="search" v-model="keyword" autocomplete="off" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Tìm kiếm sản phẩm" required />
+                                    <button type="submit" class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Tìm kiếm</button>
+                                    <div  v-if="products && products.length > 0" class="bg-white absolute rounded-md w-full">
                                         <div v-if="isSearching" class="loading-indicator border-gray-200 rounded-lg dark:bg-neutral-800 dark:border-neutral-700">
                                             Đang tìm kiếm...
                                         </div>
@@ -70,21 +76,21 @@
                                                 <Link :href="route('product.show', { slug: product.slug, id: product.id })">
                                                     <div class="flex justify-between items-center">
                                                         <div class="flex items-center gap-2">
-                                                            <img class="w-10 h-10" src="https://flowbite.s3.amazonaws.com/blocks/e-commerce/apple-watch-light.svg" alt="">
+                                                            <img class="w-10 h-10 rounded-md" v-if="product.images.length > 0" :src="product.images[0].url" alt="">
                                                             <div>
                                                                 <p class="font-bold">{{ product.category.name }}</p>
                                                                 <span v-html="highlightKeyword(product.name)"></span>
                                                             </div>
                                                         </div>
                                                         <div>
-                                                            <span>{{ product.price }}$</span>
+                                                            <span>{{ product.price }}đ</span>
                                                         </div>
                                                     </div>
                                                 </Link>
                                             </li>
                                             <Link :href="route('home.search')" :data="{ keyword }">
                                                 <p class="text-center hover:bg-slate-100">
-                                                    View all results
+                                                    Xem tất cả kết quả
                                                 </p>
                                             </Link>
                                         </ul>
@@ -110,10 +116,18 @@
                                 </div>
                             </Link>
                             <button type="button"
-                                class="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none">
+                                class="relative rounded-full bg-gray-800 p-1 group text-gray-400 focus:outline-none">
                                 <span class="absolute -inset-1.5" />
                                 <span class="sr-only">View notifications</span>
-                                <BellIcon class="size-6" aria-hidden="true" />
+                                <BellIcon class="size-6 group-hover:text-white" aria-hidden="true" />
+                                <div class="absolute h-10 bg-gray-50 top-10 right-1 min-h-28 max-h-36 rounded-md">
+                                    <div class="absolute right-1 -top-2 border-solid border-b-gray-50 border-b-8 border-x-transparent border-x-8 border-t-0"></div>
+                                    <ul>
+                                        <li>loaksjfkasjfkjasfdjksjfdklsjdfkljk</li>
+                                        <li></li>
+                                        <li></li>
+                                    </ul>
+                                </div>
                             </button>
                             <!-- Profile dropdown -->
                             <Menu v-if="user" as="div" class="relative">
@@ -141,7 +155,7 @@
                                                 :class="[active ? 'bg-gray-100 outline-none' : '', 'block px-4 py-2 text-sm text-gray-700']"
                                             >
                                                 <i class="pi pi-user"></i>
-                                                Your Profile
+                                                Thông tin cá nhân
                                             </Link>
                                         </MenuItem>
                                         <MenuItem v-slot="{active}">
@@ -150,7 +164,7 @@
                                                 :class="[active ? 'bg-gray-100 outline-none' : '', 'block px-4 py-2 text-sm text-gray-700']"
                                             >
                                                 <i class="pi pi-shopping-bag"></i>
-                                                Orders
+                                                Đơn hàng
                                             </Link>
                                         </MenuItem>
                                         <MenuItem v-slot="{active}">
@@ -159,7 +173,7 @@
                                                 :class="[active ? 'bg-gray-100 outline-none' : '', 'block px-4 py-2 text-sm text-gray-700']"
                                             >
                                                 <i class="pi pi-heart"></i>
-                                                Wishlists
+                                                Danh sách yêu thích
                                             </Link>
                                         </MenuItem>
                                         <MenuItem v-slot="{active}">
@@ -169,14 +183,14 @@
                                                 :class="[active ? 'bg-gray-100 outline-none' : '', 'block w-full text-left px-4 py-2 text-sm text-gray-700']"
                                             >
                                                 <i class="pi pi-sign-out"></i>
-                                                Logout
+                                                Đăng xuất
                                             </Link>
                                         </MenuItem>
                                     </MenuItems>
                                 </transition>
                             </Menu>
                             <Menu v-else>
-                                <Link :href="route('login')" class="text-white">Sign in</Link>
+                                <Link :href="route('login')" class="text-white">Đăng nhập</Link>
                             </Menu>
                         </div>
                     </div>
@@ -187,7 +201,7 @@
                             <Disclosure>
                                 <DisclosureButton class="w-full">
                                     <div class="flex justify-between text-gray-300 hover:bg-gray-700 rounded-md px-3 py-2">
-                                        Categories
+                                        Danh mục
                                     </div>
                                 </DisclosureButton>
                                 <DisclosurePanel class="text-white">
@@ -196,7 +210,7 @@
                                             v-for="category in categories"
                                             :key="category.id"
                                             class="my-2 block border-b border-gray-100 py-1 font-semibold text-gray-500 hover:text-black md:mx-2"
-                                            :href="route('category.show', { slug: category.slug, id: category.id, category_name: category.name })"
+                                            :href="route('category.show', { slug: category.slug })"
                                             as="a"
                                         >
                                             {{ category.name }}
@@ -205,11 +219,21 @@
                                 </DisclosurePanel>
                             </Disclosure>
                         </div>
-                        <DisclosureButton v-for="(item, index) in navigation" :key="item.name" as="a" :href="item.href"
-                            :class="[item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'block rounded-md px-3 py-2 text-base font-medium']"
-                            :aria-current="item.current ? 'page' : undefined"
-                        >
-                            {{ item.name }}
+                        <DisclosureButton>
+                            <Link
+                                :href="route('home')"
+                                :class="[ page.url === '/' ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'block rounded-md px-3 py-2 text-base font-medium']"
+                            >
+                                Trang chủ
+                            </Link>
+                        </DisclosureButton>
+                        <DisclosureButton>
+                            <Link
+                                :href="route('products')"
+                                :class="[ page.url.startsWith('/products') ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white', 'block rounded-md px-3 py-2 text-base font-medium']"
+                            >
+                                Sản phẩm
+                            </Link>
                         </DisclosureButton>
                     </div>
                 </DisclosurePanel>
@@ -220,7 +244,7 @@
             <slot />
         </main>
 
-        <footer class="bg-gray-100 dark:bg-gray-900 min-h-screen">
+        <footer class="bg-gray-100 mt-12 dark:bg-gray-900 min-h-screen">
             <div class="mx-auto w-full max-w-screen-xl">
             <div class="grid grid-cols-2 gap-8 px-4 py-6 lg:py-8 md:grid-cols-4">
                 <div>
@@ -342,12 +366,6 @@ const props = defineProps({
     filters: Object
 })
 
-
-const navigation = ref([
-    { name: 'Home', href: route('home'), current: true },
-    { name: 'Products', href: route('products'), current: false },
-]);
-
 const isSearching = ref(false)
 const keyword = ref(props.filters ? props.filters.keyword : '')
 const products = ref([])
@@ -368,14 +386,6 @@ watch(keyword, debounce(async function (newKeyword) {
     isSearching.value = false;
 }, 250));
 
-function isUrl(...urls) {
-    let currentUrl = page.url.substring(1)
-    if (urls[0] === 'home') {
-        return currentUrl === ''
-    }
-    return urls.filter((url) => currentUrl.startsWith(url)).length
-}
-
 function searchProduct() {
     router.get(route('home.search'), {
         keyword: keyword.value,
@@ -392,7 +402,7 @@ function highlightKeyword(productName) {
 
     return productName.replace(
         regex,
-        `<mark class="text-red-500">${keyword.value[0] === productName[0].toLowerCase() ? capitalize(keyword.value) : keyword.value}</mark>`
+        `<span class="text-red-500">${keyword.value[0] === productName[0].toLowerCase() ? capitalize(keyword.value) : keyword.value}</span>`
     )
 }
 </script>

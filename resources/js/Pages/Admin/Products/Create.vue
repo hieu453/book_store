@@ -9,29 +9,46 @@
             <form @submit.prevent="store">
                 <div class="flex flex-wrap -mb-8 -mr-6 p-8">
                     <TextInputInertia v-model="form.name" :error="errors.name" class="pb-8 pr-6 w-full lg:w-1/2"
-                        label="Name" />
+                        label="Tên sản phẩm" />
                     <TextInputInertia v-model="form.author" :error="errors.author" class="pb-8 pr-6 w-full lg:w-1/2"
-                        label="Author" />
+                        label="Tác giả" />
                     <TextInputInertia v-model="form.language" :error="errors.language" class="pb-8 pr-6 w-full lg:w-1/2"
-                        label="Language" />
+                        label="Ngôn ngữ" />
                     <NumberInputInertia v-model="form.width" :error="errors.width" step="0.01" class="pb-8 pr-6 w-full lg:w-1/2"
-                        label="Width" />
+                        label="Rộng" />
                     <NumberInputInertia v-model="form.height" :error="errors.height" step="0.01" class="pb-8 pr-6 w-full lg:w-1/2"
-                        label="Height" />
+                        label="Dài" />
                     <NumberInputInertia v-model="form.weight" :error="errors.weight" step="0.01" class="pb-8 pr-6 w-full lg:w-1/2"
-                        label="Weight" />
+                        label="Cân nặng" />
                     <NumberInputInertia v-model="form.quantity" :error="errors.quantity" class="pb-8 pr-6 w-full lg:w-1/2"
-                        label="Quantity" />
+                        label="Số lượng" />
                     <NumberInputInertia v-model="form.price" :error="errors.price" step="0.01" class="pb-8 pr-6 w-full lg:w-1/2"
-                        label="Price" />
+                        label="Giá" />
                     <TextInputInertia v-model="form.publisher" :error="errors.publisher" class="pb-8 pr-6 w-full lg:w-1/2"
-                        label="Publisher" />
-                    <TextInputInertia v-model="form.published_date" :error="errors.pubished_date" type="date" class="pb-8 pr-6 w-full lg:w-1/2"
-                        label="Published_date" />
+                        label="Nhà xuất bản" />
+                    <TextInputInertia v-model="form.published_date" :error="errors.published_date" type="date" class="pb-8 pr-6 w-full lg:w-1/2"
+                        label="Ngày xuất bản" />
+
+                    <!-- can dong thanh component -->
+                    <div class="pb-8 pr-6 w-full lg:w-1/2">
+                        <label class="form-label">Danh mục</label>
+                        <select v-model="form.category_id">
+                            <option v-for="category in categories" :value="category.id">
+                                {{ category.name }}
+                            </option>
+                        </select>
+                        <div v-if="errors.category_id" class="form-error">{{ errors.category_id }}</div>
+                    </div>
+
+                    <!-- Images -->
+                    <div class="pb-8 pr-6 w-full">
+                        <label class="form-label">Hình ảnh</label>
+                        <input type="file" @input="form.images = $event.target.files" class="text-black" multiple>
+                        <div v-if="errors.images" class="form-error">{{ errors.images }}</div>
+                    </div>
                 </div>
                 <div class="flex items-center justify-end px-8 py-4 bg-gray-50 border-t border-gray-100">
-                    <LoadingButton :loading="form.processing" class="btn-indigo" type="submit">Create
-                        Product</LoadingButton>
+                    <LoadingButton :loading="form.processing" class="btn-indigo" type="submit">Tạo sản phẩm</LoadingButton>
                 </div>
             </form>
         </div>
@@ -48,6 +65,7 @@ import LoadingButton from '@/Components/LoadingButton.vue';
 
 defineProps({
     errors: Object,
+    categories: Object,
 })
 
 const form = useForm({
@@ -60,6 +78,8 @@ const form = useForm({
     price: null,
     quantity: null,
     publisher: null,
+    category_id: null,
+    images: null,
     published_date: null,
 })
 

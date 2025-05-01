@@ -33,7 +33,7 @@ class AdminCategoryController extends Controller
         $category->slug = Str::slug($validatedData['name']);
         $category->save();
 
-        return to_route('admin.categories')->with('success', 'Category added');
+        return to_route('admin.categories')->with('success', 'Đã thêm danh mục.');
     }
 
     public function edit($categoryId)
@@ -54,14 +54,14 @@ class AdminCategoryController extends Controller
         $category->slug = Str::slug($validatedData['name']);
         $category->save();
 
-        return back()->with('success', 'Category updated');
+        return back()->with('success', 'Đã cập nhật danh mục.');
     }
 
     public function destroy($categoryId)
     {
         Category::destroy($categoryId);
 
-        return to_route('admin.categories')->with('success', 'Category deleted');
+        return to_route('admin.categories')->with('success', 'Đã xóa danh mục.');
     }
 
 }

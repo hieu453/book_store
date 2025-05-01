@@ -13,22 +13,49 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
+        $products = Product::with('category', 'images')
+                    ->when($request->query('price'), function ($query, $price) {
+                        $query->orderBy('price', $price);
+                    })
+                    ->paginate(9)->withQueryString();
+
+        foreach ($products as $product) {
+            foreach ($product->images as $image) {
+                $image->url = $image->getImage();
+            }
+        }
+
         return Inertia::render('Home/Products/Index', [
-            'products' => Product::with('category')
-                ->when($request->query('price'), function ($query, $price) {
-                    $query->orderBy('price', $price);
-                })
-                ->paginate(9)->withQueryString(),
+            'products' => $products,
             'filters' => $request->only(['price']),
         ]);
     }
 
     public function show($slug, $id)
     {
+        $product = Product::with('category', 'reviews.rate', 'reviews.user', 'reviews.likes', 'images')->where('id', $id)->first();
+        foreach ($product->images as $image) {
+            $image->url = $image->getImage();
+        }
+
+        $randomRelatedProducts = Product::with('category:id,name', 'images')
+                                            ->where('category_id', $product->category_id)
+                                            ->inRandomOrder()
+                                            ->limit(8)
+                                            ->get();
+
+
+        foreach ($randomRelatedProducts as $relatedProduct) {
+            foreach ($relatedProduct->images as $image) {
+                $image->url = $image->getImage();
+            }
+        }
+
+
         return Inertia::render('Home/Products/Show', [
-            'product' => Product::with('category')->where('id', $id)->first(),
+            'product' => $product,
+            'relatedProducts' => $randomRelatedProducts,
             'isInWishlist' => Wishlist::where('product_id', $id)->where('user_id', Auth::id())->first() ? true : false,
-            'reviews' => Review::with('likes', 'user')->get(),
         ]);
     }
 
@@ -36,7 +63,13 @@ class ProductController extends Controller
     {
         $products = [];
         if ($keyword) {
-            $products = Product::with('category')->where('name', 'LIKE', "%{$keyword}%")->take(5)->get();
+            $products = Product::with('category', 'images')->where('name', 'LIKE', "%{$keyword}%")->take(5)->get();
+
+            foreach ($products as $product) {
+                foreach ($product->images as $image) {
+                    $image->url = $image->getImage();
+                }
+            }
         }
         return response()->json(['products' => $products]);
     }

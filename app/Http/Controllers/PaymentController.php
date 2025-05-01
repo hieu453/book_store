@@ -3,21 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cart;
+use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Order;
+use App\Mail\TestMail;
 use App\Models\Product;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use App\Helpers\Payment\Momo;
 use Illuminate\Validation\Rule;
 use App\Services\PaymentService;
+use App\Services\ProvinceService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\Payment\Environment;
-use App\Services\ProvinceService;
+use App\Notifications\OrderedNotification;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
 
 class PaymentController extends Controller
 {
@@ -30,12 +32,11 @@ class PaymentController extends Controller
     public function processCod(Request $request)
     {
         $provincesData = $this->province->getProvinces();
-
         $validatedData = $request->validate([
             'city' => ['required', Rule::in($provincesData['cities'])],
             'district' => ['required', Rule::in($provincesData['districts'])],
             'ward' => ['required', Rule::in($provincesData['wards'])],
-            'fullname' => ['required'],
+            'name' => ['required'],
             'email' => ['required'],
             'phone_number' => ['required', 'regex:/^(0|\+84|84)(\d{9,10})$/'],
         ]);
@@ -52,14 +53,14 @@ class PaymentController extends Controller
         $order = new Order;
         $order->order_id = time()."";
         $order->user_id = Auth::id();
-        $order->fullname = $validatedData['fullname'];
+        $order->name = $validatedData['name'];
         $order->email = $validatedData['email'];
         $order->phone_number = $validatedData['phone_number'];
         $order->city = $validatedData['city'];
         $order->district = $validatedData['district'];
         $order->ward = $validatedData['ward'];
         $order->quantity = $totalQuantity;
-        $order->total_price = $totalPrice;
+        $order->total_price = $totalPrice + 15;
         $order->payment_mode = 'cod';
         $order->save();
 
@@ -77,6 +78,7 @@ class PaymentController extends Controller
 
         session()->flash('orderId', $order->order_id);
 
+        Auth::user()->notify(new OrderedNotification($order));
         return to_route('payment.cod.success');
     }
 
@@ -103,7 +105,7 @@ class PaymentController extends Controller
             'city' => ['required', Rule::in($provincesData['cities'])],
             'district' => ['required', Rule::in($provincesData['districts'])],
             'ward' => ['required', Rule::in($provincesData['wards'])],
-            'fullname' => ['required'],
+            'name' => ['required'],
             'email' => ['required'],
             'phone_number' => ['required', 'regex:/^(0|\+84|84)(\d{9,10})$/'],
         ]);
@@ -146,6 +148,8 @@ class PaymentController extends Controller
         // neu forget o showcheckpage se gay ra loi khong tim thay session checkedItems
         session()->forget('checkedItems');
 
+
+
         return to_route('payment.check');
     }
 
@@ -160,7 +164,7 @@ class PaymentController extends Controller
                 $product = Product::find($item['product_id']);
                 if ($product->quantity < 1 || $product->quantity < $item['quantity']) {
                     DB::rollBack();
-                    return to_route('cart')->with('update_quantity_error', 'Quantity in stock is not enough!');
+                    return to_route('cart')->with('update_quantity_error', 'Không đủ số lượng trong kho!');
                 }
 
                 $product->quantity = $product->quantity - $item['quantity'];
@@ -173,7 +177,7 @@ class PaymentController extends Controller
             DB::rollBack();
             Log::error('Some error: ' . $e->getMessage());
 
-            return to_route('cart')->with('update_quantity_error', 'Quantity in stock is not enough!');
+            return to_route('cart')->with('update_quantity_error', 'Không đủ số lượng trong kho!');
         }
     }
 
@@ -199,13 +203,14 @@ class PaymentController extends Controller
                 $order = new Order;
                 $order->order_id = $paymentDetails['orderId'];
                 $order->user_id = Auth::id();
-                $order->fullname = session('userInfo')['fullname'];
+                $order->name = session('userInfo')['name'];
                 $order->email = session('userInfo')['email'];
                 $order->phone_number = session('userInfo')['phone_number'];
                 $order->city = session('userInfo')['city'];
                 $order->district = session('userInfo')['district'];
                 $order->ward = session('userInfo')['ward'];
                 $order->trans_id = $paymentDetails['transId'];
+                $order->request_id = $paymentDetails['requestId'];
                 $order->quantity = $totalQuantity;
                 $order->total_price = $totalPrice;
                 $order->payment_mode = 'online';
@@ -219,8 +224,17 @@ class PaymentController extends Controller
                     $orderItem->price = $item['product']['price'];
                     $orderItem->save();
                 }
+
+                Auth::user()->notify(new OrderedNotification($order));
             }
+
             $handledResult = $this->payment->handlePaymentStatusCode($paymentDetails['resultCode']);
+
+
+            if (! is_array($handledResult)) {
+                return $handledResult;
+            }
+
             return Inertia::render('Home/Payment/Online', [
                 'message' => $handledResult['message'],
                 'icon_url' => $handledResult['icon'],

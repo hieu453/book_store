@@ -14,25 +14,53 @@
                 <form @submit.prevent="update">
                     <div class="flex flex-wrap -mb-8 -mr-6 p-8">
                         <TextInputInertia v-model="form.name" :error="errors.name" class="pb-8 pr-6 w-full lg:w-1/2"
-                            label="Name" />
+                            label="Tên" />
                         <TextInputInertia v-model="form.author" :error="errors.author" class="pb-8 pr-6 w-full lg:w-1/2"
-                            label="Author" />
+                            label="Tác giả" />
                         <TextInputInertia v-model="form.language" :error="errors.language" class="pb-8 pr-6 w-full lg:w-1/2"
-                            label="Language" />
+                            label="Ngôn ngữ" />
                         <NumberInputInertia v-model="form.width" :error="errors.width" step="0.01" class="pb-8 pr-6 w-full lg:w-1/2"
-                            label="Width" />
+                            label="Rộng" />
                         <NumberInputInertia v-model="form.height" :error="errors.height" step="0.01" class="pb-8 pr-6 w-full lg:w-1/2"
-                            label="Height" />
+                            label="Dày" />
                         <NumberInputInertia v-model="form.weight" :error="errors.weight" step="0.01" class="pb-8 pr-6 w-full lg:w-1/2"
-                            label="Weight" />
+                            label="Nặng" />
                         <NumberInputInertia v-model="form.quantity" :error="errors.quantity" class="pb-8 pr-6 w-full lg:w-1/2"
-                            label="Quantity" />
+                            label="Số lượng" />
                         <NumberInputInertia v-model="form.price" :error="errors.price" step="0.01" class="pb-8 pr-6 w-full lg:w-1/2"
-                            label="Price" />
+                            label="Giá tiên" />
                         <TextInputInertia v-model="form.publisher" :error="errors.publisher" class="pb-8 pr-6 w-full lg:w-1/2"
-                            label="Publisher" />
+                            label="Nhà xuất bản" />
                         <TextInputInertia v-model="form.published_date" :error="errors.published_date" type="date" class="pb-8 pr-6 w-full lg:w-1/2"
-                            label="Published date" />
+                            label="Năm xuất bản" />
+
+                        <!-- Can dong thanh component -->
+                        <div class="pb-8 pr-6 w-full lg:w-1/2">
+                            <label class="form-label">Danh mục</label>
+                            <select v-model="form.category_id">
+                                <option v-for="category in categories" :value="category.id">
+                                    {{ category.name }}
+                                </option>
+                            </select>
+                        <div v-if="errors.category_id" class="form-error">{{ errors.category_id }}</div>
+
+                        <!-- Images -->
+                        <div class="pb-8 pr-6 w-full">
+                            <label class="form-label">Hình ảnh</label>
+                            <input type="file" @input="form.images = $event.target.files" class="text-black" multiple>
+                            <div v-if="errors.images" class="form-error">{{ errors.images }}</div>
+
+                            <div class="mt-4">
+                                <ul class="flex justify-start items-center gap-4">
+                                    <li v-for="image in product.images">
+                                        <div class="flex justify-start items-center gap-2">
+                                            <img :src="image.url" alt="" width="100" height="60">
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                     </div>
                     <div class="flex items-center px-8 py-4 bg-gray-50 border-t border-gray-100">
                         <button
@@ -41,10 +69,9 @@
                             type="button"
                             @click="destroy"
                         >
-                            Delete Category
+                            Xóa sản phẩm
                         </button>
-                        <LoadingButton :loading="form.processing" class="btn-indigo ml-auto" type="submit">Update
-                            Category</LoadingButton>
+                        <LoadingButton :loading="form.processing" class="btn-indigo ml-auto" type="submit">Cập nhật sản phẩm</LoadingButton>
                     </div>
                 </form>
             </div>
@@ -63,6 +90,7 @@ import NumberInputInertia from '@/Components/NumberInputInertia.vue';
 
 const props = defineProps({
     product: Object,
+    categories: Object,
     errors: Object,
 })
 
@@ -74,16 +102,19 @@ const form = useForm({
     weight: props.product.weight,
     quantity: props.product.quantity,
     price: props.product.price,
+    images: null,
+    category_id: props.product.category_id,
     language: props.product.language,
     publisher: props.product.publisher,
     published_date: props.product.published_date,
+    _method: 'put',
 })
 
 const toast = useToast();
 const page = usePage();
 
 function update() {
-    router.put(route('admin.products.update', { productId: props.product.id }), form, {
+    router.post(route('admin.products.update', { productId: props.product.id }), form, {
         onSuccess: () => {
             toast.add({ severity: 'success', summary: page.props.flash.success, life: 2000 })
         },

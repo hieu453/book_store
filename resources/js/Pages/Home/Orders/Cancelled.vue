@@ -1,7 +1,7 @@
 <template>
     <div class="mt-2">
-        <template v-if="processingOrders.length > 0">
-            <div v-for="order in processingOrders">
+        <template v-if="cancelledOrders.length > 0">
+            <div v-for="order in cancelledOrders">
                 <div class="flex justify-between items-center mx-4 my-2">
                     <h1 class="p-2 text-3xl font-bold">Đơn hàng: {{ order.order_id }}</h1>
                 </div>
@@ -42,5 +42,5 @@ const props = defineProps({
     orders: Array,
 })
 
-const processingOrders = computed(() => props.orders.filter(order => order.status === 'processing'));
+const cancelledOrders = computed(() => props.orders.filter(order => order.status === 'cancelled'));
 </script>

@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->integer('is_admin')->comment('1 is admin, 0 is normal user')->default(0);
+        Schema::create('cancelled_orders', function (Blueprint $table) {
+            $table->id();
+            $table->string('order_id');
+            $table->unsignedBigInteger('user_id');
+            $table->enum('status', ['processing', 'cancelled'])->default('processing');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('is_admin');
-        });
+        Schema::dropIfExists('cancelled_orders');
     }
 };

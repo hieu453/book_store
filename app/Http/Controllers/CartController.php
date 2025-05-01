@@ -12,14 +12,22 @@ class CartController extends Controller
 {
     public function index(Request $request)
     {
+        $cartItems = Cart::with(['user', 'product.images'])->where('user_id', $request->user()->id)->get();
+
+        foreach ($cartItems as $item) {
+            foreach ($item->product->images as $image) {
+                $image->url = $image->getImage();
+            }
+        }
+
         return Inertia::render('Home/Cart/Index', [
-            'cartItems' => Cart::with(['user', 'product'])->where('user_id', $request->user()->id)->get(),
+            'cartItems' => $cartItems,
         ]);
     }
 
     public function addToCart(Request $request)
     {
-        $cartItem = Cart::where('product_id', $request->product['productId'])->first();
+        $cartItem = Cart::where('product_id', $request->product['productId'])->where('user_id', Auth::id())->first();
         $product = Product::where('id', $request->product['productId'])->first();
 
         if ($product->quantity > 0) {

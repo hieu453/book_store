@@ -6,7 +6,7 @@
         <!-- End Backdrop -->
 
         <div :class="useSidebar.isOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'"
-            class="fixed inset-y-0 left-0 z-30 w-64 overflow-y-auto transition duration-300 transform bg-gray-900 lg:translate-x-0 lg:static lg:inset-0">
+            class="fixed inset-y-0 left-0 z-30 w-64 overflow-y-auto transition duration-300 transform bg-purple-600 lg:translate-x-0 lg:static lg:inset-0">
             <div class="flex items-center justify-center mt-8">
                 <div class="flex items-center">
                     <svg class="w-12 h-12" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -19,7 +19,7 @@
                             fill="white" />
                     </svg>
 
-                    <span class="mx-2 text-2xl font-semibold text-white">V-Dashboard</span>
+                    <span class="mx-2 text-2xl font-semibold text-white">Dashboard</span>
                 </div>
             </div>
 
@@ -56,7 +56,7 @@
                             fill="currentColor" />
                     </svg>
 
-                    <span class="mx-4">Categories</span>
+                    <span class="mx-4">Danh mục</span>
                 </Link>
 
                 <Link :href="route('admin.products')" class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
@@ -74,7 +74,7 @@
                             fill="currentColor" />
                     </svg>
 
-                    <span class="mx-4">Products</span>
+                    <span class="mx-4">Sản phẩm</span>
                 </Link>
 
                 <Link :href="route('admin.orders')" class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
@@ -92,7 +92,25 @@
                             fill="currentColor" />
                     </svg>
 
-                    <span class="mx-4">Orders</span>
+                    <span class="mx-4">Đơn hàng</span>
+                </Link>
+
+                <Link :href="route('admin.orders.cancelled')" class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4"
+                    :class="[ page.url.startsWith('/admin/cancelled-orders') ? activeClass : inactiveClass ]"
+                >
+                    <svg class="w-5 h-5" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M7 3C6.44772 3 6 3.44772 6 4C6 4.55228 6.44772 5 7 5H13C13.5523 5 14 4.55228 14 4C14 3.44772 13.5523 3 13 3H7Z"
+                            fill="currentColor" />
+                        <path
+                            d="M4 7C4 6.44772 4.44772 6 5 6H15C15.5523 6 16 6.44772 16 7C16 7.55228 15.5523 8 15 8H5C4.44772 8 4 7.55228 4 7Z"
+                            fill="currentColor" />
+                        <path
+                            d="M2 11C2 9.89543 2.89543 9 4 9H16C17.1046 9 18 9.89543 18 11V15C18 16.1046 17.1046 17 16 17H4C2.89543 17 2 16.1046 2 15V11Z"
+                            fill="currentColor" />
+                    </svg>
+
+                    <span class="mx-4">Yêu cầu hủy đơn hàng</span>
                 </Link>
             </nav>
         </div>
@@ -111,7 +129,7 @@ const activeClass = ref(
 );
 
 const inactiveClass = ref(
-    "border-gray-900 text-gray-500 hover:bg-gray-600 hover:bg-opacity-25 hover:text-gray-100"
+    "border-gray-900 text-black hover:bg-gray-600 hover:bg-opacity-25 hover:text-gray-100"
 );
 
 </script>

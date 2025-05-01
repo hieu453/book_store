@@ -22,9 +22,12 @@
         "@primevue/themes": "^4.2.5",
         "@stripe/stripe-js": "^5.5.0",
         "@vitejs/plugin-vue": "^5.2.3",
+        "chart.js": "^4.4.9",
         "laravel-vite-plugin": "^1.2.0",
         "lodash": "^4.17.21",
         "primeicons": "^7.0.0",
-        "primevue": "^4.2.5"
+        "primevue": "^4.2.5",
+        "quill": "^2.0.3",
+        "swiper": "^11.2.6"
     }
 }

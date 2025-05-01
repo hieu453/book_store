@@ -1,18 +1,15 @@
 <?php
 
-use App\Models\Cart;
 use Inertia\Inertia;
 use App\Models\Order;
+use App\Mail\TestMail;
 use App\Models\Review;
+use App\Models\Product;
+use App\Models\ProductImage;
 use Illuminate\Http\Request;
-use App\Helpers\Payment\Momo;
-use App\Helpers\Payment\Environment;
-use App\Http\Controllers\Admin\AdminCategoryController;
-use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Http\Controllers\Admin\AdminOrderController;
-use App\Http\Controllers\Admin\AdminProductController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
@@ -23,7 +20,11 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\WishlistController;
-use App\Models\Product;
+use App\Http\Controllers\Admin\AdminOrderController;
+use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminCategoryController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Notifications\OrderedNotification;
 
 // dev routes
 Route::get('/session-flush', function () {
@@ -32,7 +33,9 @@ Route::get('/session-flush', function () {
 });
 
 Route::get('/test', function (Request $request) {
-    return Product::with('category')->paginate(10);
+    $order = Order::where('id', 13)->first();
+
+    return (new OrderedNotification($order))->toMail($order);
 });
 Route::get('/test2', function (Request $request) {
     session()->forget('paymentDetails');
@@ -47,10 +50,10 @@ Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('categ
 
 // Product routes
 Route::get('/products', [ProductController::class, 'index'])->name('products');
-Route::get('/product/{slug}/{id}', [ProductController::class, 'show'])->name('product.show');
-Route::get('/product/{keyword?}', [ProductController::class, 'liveSearch'])->name('product.search');
+Route::get('/products/{slug}/{id}', [ProductController::class, 'show'])->name('product.show');
+Route::get('/products/{keyword?}', [ProductController::class, 'liveSearch'])->name('product.search');
 
-// Cart routes
+// Auth routes
 Route::middleware('auth')->group(function () {
     // Cart routes
     Route::get('/cart', [CartController::class, 'index'])->name('cart');
@@ -79,19 +82,13 @@ Route::middleware('auth')->group(function () {
 
 
     // Review routes
-    Route::post('/reviews', function (Request $request) {
-        $review = new Review;
-        $review->content = $request->reviewContent;
-        $review->user_id = Auth::id();
-        $review->product_id = $request->productId;
-
-        $review->save();
-    })->name('reviews.add');
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
     Route::post('/reviews/{reviewId}/like', [ReviewController::class, 'toggleLike'])->name('reviews.toggleLike');
 
 
     // Order routes
     Route::get('/orders', [OrderController::class, 'index'])->name('orders');
+    Route::post('/orders/{orderId}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
 });
 
 
@@ -122,14 +119,16 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->group(function () {
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('admin.orders');
     Route::get('/orders/{orderId}/edit', [AdminOrderController::class, 'edit'])->name('admin.orders.edit');
     Route::put('/orders/{orderId}/update', [AdminOrderController::class, 'update'])->name('admin.orders.update');
-
+    // Cancelled orders
+    Route::get('/cancelled-orders', [AdminOrderController::class, 'showCancelledOrder'])->name('admin.orders.cancelled');
+    Route::post('/cancelled-orders', [AdminOrderController::class, 'cancelOrders'])->name('admin.orders.cancel');
 });
 
 
 // Dashboard and Profile
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Route::get('/dashboard', function () {
+//     return Inertia::render('Dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

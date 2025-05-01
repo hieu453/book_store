@@ -13,15 +13,15 @@
             <div v-if="order" class="flex justify-center mt-2">
                 <table class="text-left">
                     <tr>
-                        <th>Order id:</th>
+                        <th>Mã đơn hàng:</th>
                         <td class="px-2 py-2">{{ order.order_id }}</td>
                     </tr>
                     <tr>
-                        <th>Total Quantity:</th>
+                        <th>Số lượng:</th>
                         <td class="px-2 py-2">{{ order.quantity }}</td>
                     </tr>
                     <tr>
-                        <th>Total price:</th>
+                        <th>Tổng tiền:</th>
                         <td class="px-2 py-2">{{ order.total_price }}</td>
                     </tr>
                 </table>
@@ -31,22 +31,22 @@
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
                             <th scope="col" class="px-6 py-3">
-                                Name
+                                Tên sản phẩm
                             </th>
                             <th scope="col" class="px-6 py-3">
-                                Language
+                                Ngôn ngữ
                             </th>
                             <th scope="col" class="px-6 py-3">
-                                Author
+                                Tác giả
                             </th>
                             <th scope="col" class="px-6 py-3">
-                                Publisher
+                                Nhà xuất bản
                             </th>
                             <th scope="col" class="px-6 py-3">
-                                Price
+                                Giá tiền
                             </th>
                             <th scope="col" class="px-6 py-3">
-                                Quantity
+                                Số lượng
                             </th>
                         </tr>
                     </thead>

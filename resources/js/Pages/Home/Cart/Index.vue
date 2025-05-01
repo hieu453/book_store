@@ -1,13 +1,13 @@
 <template>
     <section class="bg-white py-8 antialiased dark:bg-gray-900 md:py-8">
-        <Head title="Cart" />
+        <Head title="Giỏ hàng" />
         <Toast />
         <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">Shopping Cart</h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">Giỏ hàng</h2>
 
             <WhenVisible data="cartItems">
                 <template #fallback>
-                    <div>Loading...</div>
+                    <div>Đang tải...</div>
                 </template>
                 <template v-if="cart.length > 0">
                     <div class="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start xl:gap-8">
@@ -17,7 +17,7 @@
                                     <div class="space-y-4 flex items-center justify-between gap-6">
                                         <input type="checkbox" :checked="isCheckAll" @change="checkAll">
                                         <!-- <span><button @click="deleteBatch">Delete</button></span> -->
-                                        <span><button @click="removeItems(checkedItems)">Delete</button></span>
+                                        <span><button @click="removeItems(checkedItems)">Xóa</button></span>
                                     </div>
                                 </div>
                             </div>
@@ -32,9 +32,16 @@
                                             >
                                         </span>
                                         <a href="#" class="shrink-0 md:order-1">
-                                            <img class="h-20 w-20 dark:hidden"
-                                                src="https://flowbite.s3.amazonaws.com/blocks/e-commerce/apple-watch-light.svg"
+                                            <!-- Light -->
+                                            <img v-if="item.product.images.length > 0" class="h-20 w-20 dark:hidden rounded-md"
+                                                :src="item.product.images[0].url"
                                                 alt="imac image" />
+                                            <img v-else class="h-20 w-20 dark:hidden"
+                                                src=""
+                                                alt="imac image" />
+
+
+                                            <!-- Dark -->
                                             <img class="hidden h-20 w-20 dark:block"
                                                 src="https://flowbite.s3.amazonaws.com/blocks/e-commerce/apple-watch-dark.svg"
                                                 alt="imac image" />
@@ -76,14 +83,14 @@
                                                 </button>
                                             </div>
                                             <div class="text-end md:order-4 md:w-32">
-                                                <p class="text-base font-bold text-gray-900 dark:text-white">${{ (item.product.price * item.quantity).toFixed(2) }}</p>
+                                                <p class="text-base font-bold text-gray-900 dark:text-white">{{ (item.product.price * item.quantity).toFixed(2) }}đ</p>
                                             </div>
                                         </div>
                                         <div class="w-full min-w-0 flex-1 space-y-4 md:order-2 md:max-w-md">
                                             <a href="#"
                                                 class="text-base font-medium text-gray-900 hover:underline dark:text-white">{{ item.product.name }}</a>
                                             <div class="flex items-center gap-4">
-                                                <button type="button"
+                                                <!-- <button type="button"
                                                     class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 hover:underline dark:text-gray-400 dark:hover:text-white">
                                                     <svg class="me-1.5 h-5 w-5" aria-hidden="true"
                                                         xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
@@ -93,7 +100,7 @@
                                                             d="M12.01 6.001C6.5 1 1 8 5.782 13.001L12.011 20l6.23-7C23 8 17.5 1 12.01 6.002Z" />
                                                     </svg>
                                                     Add to Favorites
-                                                </button>
+                                                </button> -->
                                                 <button type="button"
                                                     @click="removeItems([ item ])"
                                                     class="inline-flex items-center text-sm font-medium text-red-600 hover:underline dark:text-red-500">
@@ -104,7 +111,7 @@
                                                             stroke-linejoin="round" stroke-width="2"
                                                             d="M6 18 17.94 6M18 18 6.06 6" />
                                                     </svg>
-                                                    Remove
+                                                    Xóa
                                                 </button>
                                             </div>
                                         </div>
@@ -115,7 +122,7 @@
                         <div class="mx-auto mt-6 max-w-4xl flex-1 space-y-6 lg:mt-0 lg:w-full">
                             <div
                                 class="space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-6">
-                                <p class="text-xl font-semibold text-gray-900 dark:text-white">Order summary</p>
+                                <p class="text-xl font-semibold text-gray-900 dark:text-white">Chi tiết</p>
                                 <div class="space-y-4">
                                     <!-- <div class="space-y-2">
                                         <dl class="flex items-center justify-between gap-4">
@@ -138,8 +145,8 @@
                                     </div> -->
                                     <dl
                                         class="flex items-center justify-between gap-4 border-t border-gray-200 pt-2 dark:border-gray-700">
-                                        <dt class="text-base font-bold text-gray-900 dark:text-white">Total</dt>
-                                        <dd class="text-base font-bold text-gray-900 dark:text-white">${{ totalPrice.toFixed(2) }}</dd>
+                                        <dt class="text-base font-bold text-gray-900 dark:text-white">Tổng tiền</dt>
+                                        <dd class="text-base font-bold text-gray-900 dark:text-white">{{ totalPrice.toFixed(2) }}đ</dd>
                                     </dl>
                                 </div>
                                 <button
@@ -148,13 +155,13 @@
                                     :class="{ 'cursor-not-allowed': loading }"
                                     class="flex w-full items-center justify-center rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-purple-700 focus:outline-none dark:bg-blue-600 dark:hover:bg-blue-700"
                                 >
-                                    Proceed to Checkout
+                                    Checkout
                                 </button>
                                 <div class="flex items-center justify-center gap-2">
-                                    <span class="text-sm font-normal text-gray-500 dark:text-gray-400"> or </span>
+                                    <span class="text-sm font-normal text-gray-500 dark:text-gray-400"> hoặc </span>
                                     <Link :href="route('home')" title=""
                                         class="inline-flex items-center gap-2 text-sm font-medium text-primary-700 underline hover:no-underline dark:text-primary-500">
-                                        Continue Shopping
+                                        Tiếp tục mua sắm
                                         <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                                             viewBox="0 0 24 24">
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
@@ -184,7 +191,7 @@
                 </template>
                 <template v-else>
                     <div class="px-5 py-5 max-w-sm mx-auto border rounded-lg">
-                        <h1 class="text-2xl">There are no products in cart</h1>
+                        <h1 class="text-2xl">Chưa có sản phẩm nào trong giỏ hàng</h1>
                     </div>
                 </template>
             </WhenVisible>
@@ -305,18 +312,18 @@ function removeItems(items) {
             router.get(route('cart'), {}, {
                 preserveScroll: true,
                 onSuccess: () => {
-                    toast.add({ severity: 'success', summary: 'Item deleted', life: 2000 });
+                    toast.add({ severity: 'success', summary: 'Đã xóa sản phẩm', life: 2000 });
                 }
             })
         })
         .catch(err => {
-            toast.add({ severity: 'error', summary: err.message, life: 2000 });
+            toast.add({ severity: 'error', summary: 'Bạn chưa chọn sản phẩm', life: 2000 });
         })
 }
 
 function processToCheckout() {
     if (checkedItems.value.length < 1) {
-        toast.add({ severity: 'warn', summary: 'Please select item(s)', life: 2000 })
+        toast.add({ severity: 'warn', summary: 'Bạn chưa chọn sản phẩm nào', life: 2000 })
         return;
     }
     router.post(route('cart.total'), {

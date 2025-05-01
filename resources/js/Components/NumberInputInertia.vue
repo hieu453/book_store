@@ -24,7 +24,7 @@ defineProps({
     },
     error: String,
     label: String,
-    modelValue: String,
+    modelValue: [Number, String],
 })
 
 const input = useTemplateRef('input');

@@ -1,7 +1,8 @@
 <template>
     <div class="container px-4 py-8 mx-auto">
-        <Head title="Orders" />
-        <ul class="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400">
+        <Toast />
+        <Head title="Đơn hàng" />
+        <ul class="flex flex-wrap text-sm font-medium text-center text-gray-500 border-gray-200 dark:border-gray-700 dark:text-gray-400">
             <li v-for="(_, tab) in tabs" class="me-2">
                 <a @click="currentTab = tab"
                     href="#"
@@ -21,20 +22,22 @@ import Completed from './Completed.vue';
 import Pending from './Pending.vue';
 import Processing from './Processing.vue';
 import { Head } from '@inertiajs/vue3';
+import Cancelled from './Cancelled.vue';
+import Toast from 'primevue/toast';
+
 
 const props = defineProps({
-    ordersPending: Array,
-    ordersProcessing: Array,
-    ordersCompleted: Array,
+    orders: Array,
 })
 
 const tabs = {
-    Pending,
-    Processing,
-    Completed,
+    'Chờ xác nhận': Pending,
+    'Đang xử lý': Processing,
+    'Hoàn thành': Completed,
+    'Đã hủy': Cancelled
 }
 
-const currentTab = ref('Pending')
+const currentTab = ref('Chờ xác nhận')
 
 
 </script>

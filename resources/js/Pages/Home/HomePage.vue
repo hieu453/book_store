@@ -1,6 +1,6 @@
 <template>
     <div class="container px-4 py-8 mx-auto">
-        <Head title="Home" />
+        <Head title="Trang chủ" />
         <Breadcrumb />
     </div>
 </template>

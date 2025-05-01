@@ -20,7 +20,7 @@ class PaymentService
         switch ($statusCode) {
             case ResultCode::SUCCESS:
                 return [
-                    'message' => 'Transaction success',
+                    'message' => 'Giao dịch thành công',
                     'icon' => asset('status_icons/success_icon.svg'),
                     'code' => ResultCode::SUCCESS,
                 ];
@@ -34,14 +34,14 @@ class PaymentService
                 return 'System is maintenance';
             case ResultCode::TRANSACTION_CANCEL:
                 return [
-                    'message' => 'Transaction cancelled',
+                    'message' => 'Giao dịch thất bại',
                     'icon' => asset('status_icons/cancel_icon.svg'),
                     'code' => ResultCode::TRANSACTION_CANCEL,
                 ];
             case ResultCode::WRONG_FORMAT:
                 return 'Wrong format';
             default:
-                return 'There is something wrong';
+                return 'Có lỗi xảy ra';
         }
     }
 }
