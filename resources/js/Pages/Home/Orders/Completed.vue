@@ -12,7 +12,7 @@
             </div>
             <div class="flex justify-end gap-2">
                 <Button type="button" label="Hủy" severity="secondary" @click="visible = false"></Button>
-                <Button type="button" label="Đánh giá" @click="addReview" class="btn-indigo"></Button>
+                <Button type="button" label="Đánh giá" @click="addReview" class="!border-none !bg-indigo-500"></Button>
             </div>
         </Dialog>
         <template v-if="completedOrders.length > 0">
@@ -25,7 +25,7 @@
                             <Link :href="route('product.show', { slug: item.product.slug, id: item.product.id })">
                                 <div class="flex items-center gap-x-2">
                                     <img
-                                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                                        :src="`http://localhost:8000/storage/product_images/product_${item.product.id}/${item.product.images[0].image_name}`"
                                         alt="product_image"
                                         class="w-20 rounded-lg"
                                     >
@@ -52,7 +52,7 @@
                                         Đánh giá
                                     </button>
                                     <div>
-                                        <span class="text-xl">Giá: {{ item.price }}đ</span>
+                                        <span class="text-xl">Giá: {{ formatCurrency(item.price) }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -75,6 +75,7 @@ import Button from 'primevue/button';
 import Textarea from 'primevue/textarea';
 import Rating from '@/Components/Rating.vue';
 import Quill from 'quill';
+import formatCurrency from '@/helper/formatCurrency';
 
 
 const props = defineProps({

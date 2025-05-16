@@ -8,14 +8,22 @@
                     <div v-for="wishlist in wishlists.data" :key="wishlist.id">
                         <Card style="overflow: hidden;">
                             <template #header>
-                                <img alt="user header" src="https://primefaces.org/cdn/primevue/images/usercard.png" />
+                                <img v-if="wishlist.product.images.length > 0" :src="wishlist.product.images[0].url" style="height: 300px; width: 100%;" />
+                                <img v-else src="" alt="product image" style="height: 300px;">
                             </template>
-                            <template #title>{{ wishlist.product.category.name }}</template>
-                            <template #subtitle>{{ wishlist.product.name }}</template>
+                            <template #title>
+                                <div class="line-clamp-2 has-tooltip">
+                                    <h1>
+                                        {{ wishlist.product.name }}
+                                    </h1>
+                                    <div class="tooltip text-sm font-thin -mt-20 bg-gray-100 shadow-md text-black rounded-sm p-2">
+                                        {{ wishlist.product.name }}
+                                    </div>
+                                </div>
+                            </template>
                             <template #content>
-                                <p class="m-0">
-                                    {{ wishlist.product.price }}đ
-                                </p>
+                                <span class="text-xl font-bold mr-2 dark:text-black">{{ formatCurrency(wishlist.product.new_price ?? wishlist.product.price) }}</span>
+                                <span v-if="wishlist.product.new_price" class="text-gray-500 line-through">{{ formatCurrency(wishlist.product.price) }}</span>
                             </template>
                             <template #footer>
                                 <div class="flex gap-2 mt-1 items-center">
@@ -47,6 +55,7 @@ import { WhenVisible, Link, Head } from '@inertiajs/vue3';
 import Card from 'primevue/card';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { ref } from 'vue';
+import formatCurrency from '@/helper/formatCurrency';
 
 const props = defineProps({
     wishlists: Object,

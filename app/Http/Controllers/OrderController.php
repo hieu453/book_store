@@ -13,7 +13,7 @@ class OrderController extends Controller
     public function index()
     {
         return Inertia::render('Home/Orders/Index', [
-            'orders' => Order::with(['orderItems.product.reviews', 'cancelledOrder'])->where('user_id', Auth::id())->get(),
+            'orders' => Order::with(['orderItems.product.reviews', 'cancelledOrder', 'orderItems.product.images'])->where('user_id', Auth::id())->get(),
         ]);
     }
 

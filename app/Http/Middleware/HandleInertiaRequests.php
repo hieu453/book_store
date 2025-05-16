@@ -42,7 +42,9 @@ class HandleInertiaRequests extends Middleware
                 'payment_status' => fn () => $request->session()->get('payment_status'),
                 'update_quantity_error' => fn () => $request->session()->get('update_quantity_error'),
                 'success' => fn () => $request->session()->get('success'),
-            ]
+            ],
+            'notifications' => $request->user() ? $request->user()->notifications()->limit(6)->get() : [],
+            'unreadNotifications' => $request->user() ? $request->user()->unreadNotifications()->count() : 0,
         ];
     }
 }

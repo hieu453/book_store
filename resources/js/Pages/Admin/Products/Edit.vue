@@ -28,11 +28,19 @@
                         <NumberInputInertia v-model="form.quantity" :error="errors.quantity" class="pb-8 pr-6 w-full lg:w-1/2"
                             label="Số lượng" />
                         <NumberInputInertia v-model="form.price" :error="errors.price" step="0.01" class="pb-8 pr-6 w-full lg:w-1/2"
-                            label="Giá tiên" />
+                            label="Giá tiền" />
+                        <NumberInputInertia v-model="form.new_price" :error="errors.new_price" step="0.01" class="pb-8 pr-6 w-full lg:w-1/2"
+                            label="Giá tiền mới" />
                         <TextInputInertia v-model="form.publisher" :error="errors.publisher" class="pb-8 pr-6 w-full lg:w-1/2"
                             label="Nhà xuất bản" />
                         <TextInputInertia v-model="form.published_date" :error="errors.published_date" type="date" class="pb-8 pr-6 w-full lg:w-1/2"
                             label="Năm xuất bản" />
+
+                        <div class="pb-8 pr-6 w-full lg:w-1/2">
+                            <label class="form-label">Mô tả</label>
+                            <Textarea v-model="form.description" @input="form.description.trim()" class="flex-auto" autocomplete="off" />
+                            <div v-if="errors.description" class="form-error"></div>
+                        </div>
 
                         <!-- Can dong thanh component -->
                         <div class="pb-8 pr-6 w-full lg:w-1/2">
@@ -87,6 +95,7 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import TextInputInertia from '@/Components/TextInputInertia.vue';
 import LoadingButton from '@/Components/LoadingButton.vue';
 import NumberInputInertia from '@/Components/NumberInputInertia.vue';
+import { Textarea } from 'primevue';
 
 const props = defineProps({
     product: Object,
@@ -101,6 +110,8 @@ const form = useForm({
     height: props.product.height,
     weight: props.product.weight,
     quantity: props.product.quantity,
+    new_price: props.product.new_price,
+    description: props.product.description,
     price: props.product.price,
     images: null,
     category_id: props.product.category_id,

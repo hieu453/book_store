@@ -5,16 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Order;
-use App\Mail\TestMail;
 use Illuminate\Http\Request;
-use App\Helpers\Payment\Momo;
 use App\Models\CancelledOrder;
+use App\Mail\UpdateOrderStatus;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\DB;
 use App\Helpers\Payment\Environment;
 use App\Http\Controllers\Controller;
-use App\Notifications\UpdateOrderStatusNotification;
 use Illuminate\Support\Facades\Mail;
+use App\Notifications\UpdateOrderStatusNotification;
 
 class AdminOrderController extends Controller
 {
@@ -39,11 +37,18 @@ class AdminOrderController extends Controller
         ]);
 
         $order = Order::find($orderId);
+
+        if ($order->status === $validatedData['status']) {
+            return back()->with('success', 'Không có thay đổi.');
+        }
+
         $order->status = $validatedData['status'];
         $order->save();
 
+        // gui thong bao va email, email dua vao queue
         $user = User::find($order->user_id);
         $user->notify(new UpdateOrderStatusNotification($order));
+        Mail::to($user)->queue(new UpdateOrderStatus($order));
 
         return back()->with('success', 'Đã cập nhật đơn hàng.');
     }

@@ -1,7 +1,7 @@
 <template>
     <div :class="$attrs.class">
         <label class="form-label">Trạng thái đơn hàng</label>
-        <select @change="emit('update:modelValue', $event.target.value)">
+        <select @change="emit('update:modelValue', $event.target.value)" class="rounded-md">
             <option v-for="(v, k) in status" :value="k" :selected="k === order.status">
                 {{ v }}
             </option>

@@ -10,4 +10,13 @@
     .btn {
         @apply text-white focus:outline-none font-medium rounded-full text-sm px-5 py-2.5 text-center;
     }
+
+    .tooltip {
+        @apply invisible absolute;
+    }
+
+    .has-tooltip:hover .tooltip {
+        @apply visible z-50
+    }
+
 }

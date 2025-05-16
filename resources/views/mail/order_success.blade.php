@@ -109,7 +109,8 @@
             @foreach ($order->orderItems as $item)
                 <div class="flex gap-4 items-center">
                     @if ($item->product->images->count() > 0)
-                        <img src="{{ $item->product->images[0]->getImage() }}" class="w-32 h-32 rounded-lg" alt="product image">
+                        <img src="{{ "http://localhost:8000/storage/product_images/product_{$item->product->id}/{$item->product->images[0]->image_name}" }}"
+                            class="w-32 h-32 rounded-lg" alt="product image">
                     @else
                         <img src="" alt="product image" class="w-32 h-32 rounded-lg">
                     @endif
@@ -118,7 +119,7 @@
                         <h3>Tác giả: <strong>{{ $item->product->author }}</strong></h3>
                         <div class="flex justify-between items-center">
                             <h3>Số lượng: <strong>{{ $item->quantity }}</strong></h3>
-                            <h3>Giá: <strong>{{ $item->quantity * $item->price }}đ</strong></h3>
+                            <h3>Giá: <strong>{{ number_format($item->quantity * $item->price, 0, '', '.') }}đ</strong></h3>
                         </div>
                     </div>
                 </div>
@@ -159,12 +160,12 @@
             <div class="flex justify-between items-center">
                 <h3 class="font-bold">Phí ship:</h3>
                 <h3 class="font-bold">
-                    {{ $order->payment_mode === 'cod' ? '15đ' : '0đ' }}
+                    {{ $order->payment_mode === 'cod' ? '15.000đ' : '0đ' }}
                 </h3>
             </div>
             <div class="flex justify-between items-center">
                 <h3 class="font-bold">Tổng ({{ $order->quantity }}):</h3>
-                <h3 class="font-bold">{{ $order->total_price }}đ</h3>
+                <h3 class="font-bold">{{ number_format($order->total_price, 0, '', '.') }}đ</h3>
             </div>
         </div>
     </div>

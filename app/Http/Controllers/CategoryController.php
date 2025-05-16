@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -15,13 +16,23 @@ class CategoryController extends Controller
             ->when($request->input('price'), function ($query, $price) {
                 $query->orderBy('price', $price);
             })
+            ->when($request->input('name'), function ($query, $name) {
+                $query->orderBy('name', $name);
+            })
             ->paginate(9)
             ->withQueryString();
+
+        foreach ($products as $product) {
+            foreach ($product->images as $image) {
+                $image->url = $image->getImage();
+            }
+        }
 
         return Inertia::render('Home/Categories/Show', [
             'category_slug' => $slug,
             'products' => $products,
-            'filters' => $request->only(['price'])
+            'category_name' => Category::where('slug', $slug)->first('name'),
+            'filters' => $request->only(['price', 'name'])
         ]);
     }
 }

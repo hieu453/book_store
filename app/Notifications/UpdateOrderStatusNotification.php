@@ -29,7 +29,7 @@ class UpdateOrderStatusNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database'];
     }
 
     /**
@@ -51,7 +51,17 @@ class UpdateOrderStatusNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+
+        ];
+    }
+
+    public function toDatabase(object $notifiable)
+    {
+        return [
+            'message' => 'Đã cập nhật trạng thái đơn hàng',
+            'order_id' => $this->order->order_id,
+            'order_status' => $this->order->status,
+            'link' => route('orders')
         ];
     }
 }

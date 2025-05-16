@@ -47,8 +47,8 @@
                     <h2 class="text-3xl font-bold mb-2 dark:text-black">{{ product.name }}</h2>
                     <p class="text-gray-600 mb-4">{{ product.category.name }}</p>
                     <div class="mb-4">
-                        <span class="text-2xl font-bold mr-2 dark:text-black">{{ product.price }}đ</span>
-                        <!-- <span class="text-gray-500 line-through">$399.99</span> -->
+                        <span class="text-2xl font-bold mr-2 dark:text-black">{{ formatCurrency(product.new_price ?? product.price) }}</span>
+                        <span v-if="product.new_price" class="text-gray-500 line-through">{{ formatCurrency(product.price) }}</span>
                     </div>
                     <div class="flex items-center mb-4">
                         <svg v-for="i in 5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
@@ -62,11 +62,12 @@
                     <div class="mb-6">
                         <h3 class="text-lg font-semibold mb-2 dark:text-black">Thông tin:</h3>
                         <ul class="list-disc list-inside text-gray-700">
-                            <li>Tác giả: {{ product.author }}</li>
-                            <li>Kích thước: {{ product.width }} x {{ product.height }}cm</li>
-                            <li>Ngôn ngữ: {{ product.language }}</li>
-                            <li>Nhà xuất bản: {{ product.publisher }}</li>
-                            <li>Năm xuất bản: {{ formatTimestamp(product.published_date) }}</li>
+                            <li class="space-x-4"><strong>Tác giả:</strong><span>{{ product.author }}</span></li>
+                            <li class="space-x-4"><strong>Kích thước:</strong><span>{{ product.width }} x {{ product.height }}cm</span></li>
+                            <li class="space-x-4"><strong>Ngôn ngữ:</strong><span>{{ product.language }}</span></li>
+                            <li class="space-x-4"><strong>Số lượng còn lại:</strong><span>{{ product.quantity }}</span></li>
+                            <li class="space-x-4"><strong>Nhà xuất bản:</strong><span>{{ product.publisher }}</span></li>
+                            <li class="space-x-4"><strong>Năm xuất bản:</strong><span>{{ formatTimestamp(product.published_date) }}</span></li>
                         </ul>
                     </div>
                     <div class="mb-6">
@@ -129,21 +130,18 @@
                         </div>
                     </div>
                     <p class="text-gray-700 mb-6">
-                        Experience premium sound quality and industry-leading noise
-                        cancellation
-                        with
-                        these wireless headphones. Perfect for music lovers and frequent travelers.
+                        {{ product.description }}
                     </p>
                 </div>
             </div>
 
             <div class="mt-4">
-                <h1 class="text-xl">Đánh giá sản phẩm</h1>
+                <h1 class="text-xl font-bold">Đánh giá sản phẩm</h1>
                 <Review :product="product" />
             </div>
 
             <div class="mt-4">
-                <h1 class="text-xl">Có thể bạn sẽ thích</h1>
+                <h1 class="text-xl font-bold">Có thể bạn sẽ thích</h1>
                 <Swiper
                     :slidesPerView="1"
                     :spaceBetween="30"
@@ -167,12 +165,19 @@
                                 <img v-if="product.images.length > 0" :src="product.images[0].url" style="height: 300px; width: 100%;" />
                                 <img v-else src="" alt="product image" style="height: 300px; width: 100%;">
                             </template>
-                            <template #title>{{ product.category.name }}</template>
-                            <template #subtitle>{{ product.name }}</template>
+                            <template #subtitle>
+                                <div class="line-clamp-2 has-tooltip">
+                                    <h1>
+                                        {{ product.name }}
+                                    </h1>
+                                    <div class="tooltip -mt-20 bg-gray-100 shadow-md text-black rounded-sm p-2">
+                                        {{ product.name }}
+                                    </div>
+                                </div>
+                            </template>
                             <template #content>
-                                <p class="m-0">
-                                    {{ product.price }}đ
-                                </p>
+                                <span class="text-xl font-bold mr-2 dark:text-black">{{ formatCurrency(product.new_price ?? product.price) }}</span>
+                                <span v-if="product.new_price" class="text-gray-500 line-through">{{ formatCurrency(product.price) }}</span>
                             </template>
                             <template #footer>
                                 <div class="flex gap-2 mt-1 items-center">
@@ -210,6 +215,10 @@ import 'swiper/css';
 import 'swiper/css/free-mode';
 import 'swiper/css/navigation';
 import 'swiper/css/thumbs';
+import formatCurrency from '@/helper/formatCurrency';
+
+// Dayjs
+import dayjs from 'dayjs';
 
 const props = defineProps({
     product: Object,
@@ -223,8 +232,6 @@ const breadCrumb = ref([
         label: props.product.category.name,
         link: route('category.show', {
             slug: props.product.category.slug,
-            id: props.product.category.id,
-            category_name: props.product.category.name,
         }),
     },
 ])
@@ -352,7 +359,7 @@ async function addToWishlist() {
 
 <style scoped>
 .mySwiper2 {
-  height: 80%;
+  height: 70%;
   width: 100%;
 }
 

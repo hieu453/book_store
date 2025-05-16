@@ -31,7 +31,7 @@
                 </div>
 
                 <div class="flex justify-between">
-                    <span>{{ formatTimestamp(review.created_at) }}</span>
+                    <span>{{ dayjs(review.created_at).locale('vi').fromNow() }}</span>
                     <button
                         :class="[isLiked(review) ? 'bg-blue-500' : 'bg-blue-400 hover:bg-blue-500', 'btn p-1 px-2 border']"
                         @click="toggleLike(review.id)"
@@ -53,8 +53,8 @@
 
 <script setup>
 import { router, usePage } from '@inertiajs/vue3';
+import dayjs from 'dayjs';
 import { computed, ref } from 'vue';
-import formatTimestamp from '@/helper/formatDate';
 
 const props = defineProps({
     product: Object,

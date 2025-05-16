@@ -41,7 +41,7 @@
                             <Tag :value="getVietnameseStatus(data.status)" :severity="getSeverity(data.status)" />
                         </template>
                         <template #filter="{ filterModel, filterCallback }">
-                            <Select v-model="filterModel.value" @change="filterCallback()" :options="statuses" placeholder="Chọn" style="min-width: 12rem" :showClear="true">
+                            <Select v-model="filterModel.value" @change="filterCallback()" class="border" :options="statuses" placeholder="Chọn" style="min-width: 12rem" :showClear="true">
                                 <template #option="slotProps">
                                     <Tag :value="getVietnameseStatus(slotProps.option)" :severity="getSeverity(slotProps.option)" />
                                 </template>

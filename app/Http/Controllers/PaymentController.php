@@ -17,9 +17,12 @@ use App\Services\ProvinceService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\Payment\Environment;
-use App\Notifications\OrderedNotification;
+use App\Mail\NewOrder;
+use App\Mail\OrderSuccess;
+use App\Notifications\NewOrderNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 
 class PaymentController extends Controller
 {
@@ -78,7 +81,10 @@ class PaymentController extends Controller
 
         session()->flash('orderId', $order->order_id);
 
-        Auth::user()->notify(new OrderedNotification($order));
+        Mail::to(Auth::user())->queue(new OrderSuccess($order));
+        $admins = User::where('is_admin', 1)->get();
+        Notification::send($admins, new NewOrderNotification($order));
+
         return to_route('payment.cod.success');
     }
 
@@ -88,7 +94,7 @@ class PaymentController extends Controller
 
         if (session('orderId')) {
             return Inertia::render('Home/Payment/Cod', [
-                'message' => 'You ordered',
+                'message' => 'Bạn đã đặt hàng',
                 'icon_url' => asset('status_icons/success_icon.svg'),
                 'order' => Order::where('order_id', session('orderId'))->with('orderItems.product')->first(),
             ]);
@@ -119,7 +125,7 @@ class PaymentController extends Controller
         $jsonResult = Momo::process(
             new Environment(),
             "https://test-payment.momo.vn/v2/gateway/api/create",
-            (string)$totalPrice * 1000,
+            (string)$totalPrice,
             time()."",
             "Thanh toán qua MoMo",
             route('payment.redirect')
@@ -147,8 +153,6 @@ class PaymentController extends Controller
 
         // neu forget o showcheckpage se gay ra loi khong tim thay session checkedItems
         session()->forget('checkedItems');
-
-
 
         return to_route('payment.check');
     }
@@ -181,7 +185,7 @@ class PaymentController extends Controller
         }
     }
 
-    public function showCheckPage()
+    public function showCheckPage(Request $request)
     {
         session()->keep(['paymentDetails', 'flashCheckedItems']);
         //dd(session('paymentDetails'));
@@ -225,11 +229,15 @@ class PaymentController extends Controller
                     $orderItem->save();
                 }
 
-                Auth::user()->notify(new OrderedNotification($order));
+                $admins = User::where('is_admin', 1)->get();
+                // gui email va thong bao cho admins
+                Notification::send($admins, new NewOrderNotification($order));
+
+                // gui email cho user mua hang
+                Mail::to($request->user())->queue(new OrderSuccess($order));
             }
 
             $handledResult = $this->payment->handlePaymentStatusCode($paymentDetails['resultCode']);
-
 
             if (! is_array($handledResult)) {
                 return $handledResult;

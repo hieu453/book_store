@@ -17,6 +17,9 @@ class ProductController extends Controller
                     ->when($request->query('price'), function ($query, $price) {
                         $query->orderBy('price', $price);
                     })
+                    ->when($request->query('name'), function ($query, $name) {
+                        $query->orderBy('name', $name);
+                    })
                     ->paginate(9)->withQueryString();
 
         foreach ($products as $product) {
@@ -27,7 +30,7 @@ class ProductController extends Controller
 
         return Inertia::render('Home/Products/Index', [
             'products' => $products,
-            'filters' => $request->only(['price']),
+            'filters' => $request->only(['price', 'name']),
         ]);
     }
 
@@ -40,6 +43,7 @@ class ProductController extends Controller
 
         $randomRelatedProducts = Product::with('category:id,name', 'images')
                                             ->where('category_id', $product->category_id)
+                                            ->where('id', '!=', $product->id)
                                             ->inRandomOrder()
                                             ->limit(8)
                                             ->get();

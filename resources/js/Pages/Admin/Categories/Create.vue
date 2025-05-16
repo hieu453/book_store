@@ -1,9 +1,9 @@
 <template>
     <Dashboard>
-        <Head title="Create Category" />
+        <Head title="Tạo danh mục" />
         <h1 class="mb-8 text-3xl font-bold">
-            <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.categories')">Categories</Link>
-            <span class="text-indigo-400 font-medium">/</span> Create
+            <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.categories')">Danh mục</Link>
+            <span class="text-indigo-400 font-medium">/</span> Tạo
         </h1>
         <div class="max-w-3xl bg-white rounded-md shadow overflow-hidden">
             <form @submit.prevent="store">
@@ -12,8 +12,7 @@
                         label="Name" />
                 </div>
                 <div class="flex items-center justify-end px-8 py-4 bg-gray-50 border-t border-gray-100">
-                    <LoadingButton :loading="form.processing" class="btn-indigo" type="submit">Create
-                        Category</LoadingButton>
+                    <LoadingButton :loading="form.processing" class="btn-indigo" type="submit">Tạo danh mục</LoadingButton>
                 </div>
             </form>
         </div>

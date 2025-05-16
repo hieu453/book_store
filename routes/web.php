@@ -1,15 +1,12 @@
 <?php
 
-use Inertia\Inertia;
+use App\Models\User;
 use App\Models\Order;
-use App\Mail\TestMail;
-use App\Models\Review;
-use App\Models\Product;
-use App\Models\ProductImage;
+use App\Mail\NewOrder;
+use App\Mail\OrderSuccess;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
@@ -17,14 +14,18 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Notifications\NewOrderNotification;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\WishlistController;
+use Illuminate\Support\Facades\Notification;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Notifications\OrderedNotification;
+use App\Http\Controllers\Admin\AdminUserController;
+use App\Mail\UpdateOrderStatus;
 
 // dev routes
 Route::get('/session-flush', function () {
@@ -32,13 +33,14 @@ Route::get('/session-flush', function () {
     return redirect()->back();
 });
 
-Route::get('/test', function (Request $request) {
-    $order = Order::where('id', 13)->first();
-
-    return (new OrderedNotification($order))->toMail($order);
+Route::get('/mailable', function () {
+    $order = Order::find(1746947854);
+    return new UpdateOrderStatus($order);
 });
+
 Route::get('/test2', function (Request $request) {
-    session()->forget('paymentDetails');
+
+    return;
 });
 
 // Home routes
@@ -89,6 +91,10 @@ Route::middleware('auth')->group(function () {
     // Order routes
     Route::get('/orders', [OrderController::class, 'index'])->name('orders');
     Route::post('/orders/{orderId}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+
+    // Notification routes
+    Route::get('/notifications', [NotificationController::class, 'userNotifications'])->name('notifications');
+    Route::post('/notifications/read/{notificationId}', [NotificationController::class, 'markAsRead'])->name('notifications.read');
 });
 
 
@@ -104,6 +110,7 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->group(function () {
     Route::get('/categories/{categoryId}/edit', [AdminCategoryController::class, 'edit'])->name('admin.categories.edit');
     Route::put('/categories/{categoryId}/update', [AdminCategoryController::class, 'update'])->name('admin.categories.update');
     Route::delete('/categories/{categoryId}', [AdminCategoryController::class, 'destroy'])->name('admin.categories.destroy');
+    Route::post('/categories/check-all', [AdminCategoryController::class, 'selectAll'])->name('admin.categories.check.all');
 
 
     // Product routes
@@ -114,6 +121,14 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->group(function () {
     Route::put('/products/{productId}/update', [AdminProductController::class, 'update'])->name('admin.products.update');
     Route::delete('/products/{productId}/destroy', [AdminProductController::class, 'destroy'])->name('admin.products.destroy');
 
+    // User routes
+    Route::get('/users/create', [AdminUserController::class, 'create'])->name('admin.users.create');
+    Route::post('/users', [AdminUserController::class, 'store'])->name('admin.users.store');
+    Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users');
+    Route::get('/users/{userId}/edit', [AdminUserController::class, 'edit'])->name('admin.users.edit');
+    Route::put('/users/{userId}/update', [AdminUserController::class, 'update'])->name('admin.users.update');
+    Route::delete('/users/{userId}/delete', [AdminUserController::class, 'delete'])->name('admin.users.delete');
+
 
     // Order routes
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('admin.orders');
@@ -122,6 +137,10 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->group(function () {
     // Cancelled orders
     Route::get('/cancelled-orders', [AdminOrderController::class, 'showCancelledOrder'])->name('admin.orders.cancelled');
     Route::post('/cancelled-orders', [AdminOrderController::class, 'cancelOrders'])->name('admin.orders.cancel');
+
+    // Admin notifications
+    // Notification routes
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('admin.notifications');
 });
 
 

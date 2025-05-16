@@ -1,14 +1,23 @@
 <template>
     <div class="container px-4 py-8 mx-auto">
         <Head title="Kết quả tìm kiếm" />
-        <div class="flex justify-between">
+        <div class="md:flex md:justify-between">
             <Breadcrumb :data="breadCrumb" />
-            <div class="flex items-center space-x-2">
-                <h1 class="text-lg font-bold">Bộ lọc</h1>
-                <select v-model="price" @change="filter">
+            <div class="md:flex md:items-center mt-3 md:mt-0 text-center space-y-2 space-x-2">
+                <h1 class="hidden md:block">Bộ lọc</h1>
+                <select class="rounded-md" v-model="price" @change="filter">
+                    <option value="">Sắp xếp theo giá tiền</option>
                     <option :value="priceOrder.asc">Thấp đến cao</option>
                     <option :value="priceOrder.desc">Cao đến thấp</option>
                 </select>
+                <select class="rounded-md" v-model="name" @change="filter">
+                    <option value="">Sắp xếp theo tên</option>
+                    <option :value="nameOrder.asc">Thấp đến cao</option>
+                    <option :value="nameOrder.desc">Cao đến thấp</option>
+                </select>
+                <Link :href="route('home.search')" :data="{ keyword: filters.keyword }">
+                    <i v-if="price || name" class="pi pi-filter-slash"></i>
+                </Link>
             </div>
         </div>
         <div class="mt-3 flex space-x-4">
@@ -31,14 +40,22 @@
                     <div v-for="product in products.data" :key="product.id">
                         <Card style="overflow: hidden;">
                             <template #header>
-                                <img alt="user header" src="https://primefaces.org/cdn/primevue/images/usercard.png" />
+                                <img v-if="product.images.length > 0" :src="product.images[0].url" style="height: 300px; width: 100%;" />
+                                <img v-else src="" alt="product image" style="height: 300px;">
                             </template>
-                            <template #title>{{ product.category.name }}</template>
-                            <template #subtitle>{{ product.name }}</template>
+                            <template #title>
+                                <div class="line-clamp-2 has-tooltip">
+                                    <h1>
+                                        {{ product.name }}
+                                    </h1>
+                                    <div class="tooltip text-sm font-thin -mt-20 bg-gray-100 shadow-md text-black rounded-sm p-2">
+                                        {{ product.name }}
+                                    </div>
+                                </div>
+                            </template>
                             <template #content>
-                                <p class="m-0">
-                                    {{ product.price }}đ
-                                </p>
+                                <span class="text-xl font-bold mr-2 dark:text-black">{{ formatCurrency(product.new_price ?? product.price) }}</span>
+                                <span v-if="product.new_price" class="text-gray-500 line-through">{{ formatCurrency(product.price) }}</span>
                             </template>
                             <template #footer>
                                 <div class="flex gap-2 mt-1 items-center">
@@ -69,6 +86,7 @@
 <script setup>
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import Pagination from '@/Components/Pagination.vue';
+import formatCurrency from '@/helper/formatCurrency';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { Card } from 'primevue';
 import { ref } from 'vue';
@@ -87,16 +105,29 @@ const breadCrumb = ref([
 ])
 
 
-const price = ref(props.filters.price)
+const price = ref(props.filters.price ?? '')
+const name = ref(props.filters.name ?? '')
 const priceOrder = ref({
     asc: 'asc',
     desc: 'desc',
 })
 
+const nameOrder = ref({
+    asc: 'asc',
+    desc: 'desc',
+})
+
 function filter() {
-    router.get(route('home.search'), {
+    const data = {
         price: price.value,
-        keyword: props.filters.keyword
-    })
+        keyword: props.filters.keyword,
+        name: name.value,
+    }
+
+    const filteredObject = Object.fromEntries(
+        Object.entries(data).filter(([_, v]) => v != '')
+    );
+
+    router.get(route('home.search'), filteredObject)
 }
 </script>

@@ -12,8 +12,14 @@ class WishlistController extends Controller
 {
     public function index()
     {
+        $wishlists = Wishlist::where('user_id', Auth::id())->with('product.category', 'product.images')->paginate(12);
+        foreach ($wishlists as $wishlist) {
+            foreach ($wishlist->product->images as $image) {
+                $image->url = $image->getImage();
+            }
+        }
         return Inertia::render('Home/Wishlist/Index', [
-            'wishlists' => Wishlist::where('user_id', Auth::id())->with('product.category')->paginate(12),
+            'wishlists' => $wishlists,
         ]);
     }
 

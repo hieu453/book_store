@@ -169,7 +169,7 @@
                         <div class="my-3 divide-y divide-gray-200 dark:divide-gray-800">
                             <dl class="flex items-center justify-between gap-4 py-3">
                                 <dt class="text-base font-normal text-gray-500 dark:text-gray-400">Giá sản phẩm</dt>
-                                <dd class="text-base font-medium text-gray-900 dark:text-white">{{ totalPrice.toFixed(2) }}đ</dd>
+                                <dd class="text-base font-medium text-gray-900 dark:text-white">{{ formatCurrency(totalPrice) }}</dd>
                             </dl>
 
                             <!-- <dl class="flex items-center justify-between gap-4 py-3">
@@ -184,12 +184,12 @@
 
                             <dl class="flex items-center justify-between gap-4 py-3">
                                 <dt class="text-base font-normal text-gray-500 dark:text-gray-400">Phí</dt>
-                                <dd class="text-base font-medium text-gray-900 dark:text-white">{{ fee }}đ</dd>
+                                <dd class="text-base font-medium text-gray-900 dark:text-white">{{ formatCurrency(fee) }}</dd>
                             </dl>
 
                             <dl class="flex items-center justify-between gap-4 py-3">
                                 <dt class="text-base font-bold text-gray-900 dark:text-white">Tổng tiền phải thanh toán</dt>
-                                <dd class="text-base font-bold text-gray-900 dark:text-white">{{ totalCheckoutPrice.toFixed(2) }}đ</dd>
+                                <dd class="text-base font-bold text-gray-900 dark:text-white">{{ formatCurrency(totalCheckoutPrice) }}</dd>
                             </dl>
                         </div>
                     </div>
@@ -206,6 +206,7 @@
 </template>
 
 <script setup>
+import formatCurrency from '@/helper/formatCurrency';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { useToast, Toast } from 'primevue';
 import { computed, onMounted, reactive, ref } from 'vue';
@@ -236,13 +237,13 @@ const district = computed(() => city.value ? city.value.districts.find(district 
 const addMoreFee = ref(false);
 const totalPrice = computed(() => {
     return props.checkedItems.reduce((totalPrice, item) => {
-        return totalPrice + (item['product']['price'] * item['quantity'])
+        return totalPrice + ((item['product']['new_price'] ?? item['product']['price']) * item['quantity'])
     }, 0)
 })
 const fee = computed(() => {
     addMoreFee.value = form.paymentMethod == "cod" ? true : false;
 
-    return addMoreFee.value ? 15 : 0;
+    return addMoreFee.value ? 15000 : 0;
 })
 const totalCheckoutPrice = computed(() => {
     return totalPrice.value + fee.value

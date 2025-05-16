@@ -10,6 +10,11 @@ import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 import ToastService from 'primevue/toastservice';
 import HomeLayout from './Layouts/HomeLayout.vue';
+import formatCurrency from './helper/formatCurrency';
+
+import dayjs from 'dayjs';
+import 'dayjs/locale/vi';
+import relativeTime from 'dayjs/plugin/relativeTime'
 
 createInertiaApp({
     title: (title) => `${title}`,
@@ -26,15 +31,12 @@ createInertiaApp({
             .use(PrimeVue, {
                 theme: {
                     preset: Aura,
-                    options: {
-                        cssLayer: {
-                            name: 'primevue',
-                            order: 'tailwind, primevue'
-                        }
-                    }
+
                 },
             })
+            .use(dayjs.extend(relativeTime))
             .use(ToastService)
+            .use(formatCurrency)
             .mount(el);
     },
     progress: {

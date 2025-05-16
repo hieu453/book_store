@@ -4,11 +4,11 @@ namespace App\Notifications;
 
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 
-class OrderedNotification extends Notification
+class NewOrderNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -16,7 +16,7 @@ class OrderedNotification extends Notification
      * Create a new notification instance.
      */
     public function __construct(
-        public Order $order,
+        public Order $order
     )
     {
         //
@@ -29,7 +29,7 @@ class OrderedNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -38,9 +38,9 @@ class OrderedNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->from('support@bookshop.com', 'Supporter')
-                    ->subject('Bạn đã đặt hàng thành công')
-                    ->view('mail.order_success', ['order' => $this->order]);
+                        ->from('support@bookshop.com', 'Supporter')
+                        ->subject('Có đơn hàng mới')
+                        ->view('mail.new_order', ['order' => $this->order]);
     }
 
     /**
@@ -52,6 +52,15 @@ class OrderedNotification extends Notification
     {
         return [
             //
+        ];
+    }
+
+    public function toDatabase()
+    {
+        return [
+            'message' => 'Có đơn hàng mới, xem ngay.',
+            'order_id' => $this->order->order_id,
+            'link' => route('admin.orders.edit', [ 'orderId' => $this->order->order_id ])
         ];
     }
 }

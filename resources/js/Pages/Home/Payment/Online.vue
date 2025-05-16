@@ -12,18 +12,20 @@
             </h1>
             <div v-if="order" class="flex justify-center mt-2">
                 <table class="text-left">
-                    <tr>
-                        <th>Mã đơn hàng:</th>
-                        <td class="px-2 py-2">{{ order.order_id }}</td>
-                    </tr>
-                    <tr>
-                        <th>Số lượng:</th>
-                        <td class="px-2 py-2">{{ order.quantity }}</td>
-                    </tr>
-                    <tr>
-                        <th>Tổng tiền:</th>
-                        <td class="px-2 py-2">{{ order.total_price }}</td>
-                    </tr>
+                    <thead>
+                        <tr>
+                            <th>Mã đơn hàng:</th>
+                            <td class="px-2 py-2">{{ order.order_id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Tổng số lượng:</th>
+                            <td class="px-2 py-2">{{ order.quantity }}</td>
+                        </tr>
+                        <tr>
+                            <th>Tổng tiền:</th>
+                            <td class="px-2 py-2">{{ order.total_price }}</td>
+                        </tr>
+                    </thead>
                 </table>
             </div>
             <div v-if="order" class="flex justify-center">

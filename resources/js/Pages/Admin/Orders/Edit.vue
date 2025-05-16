@@ -1,5 +1,5 @@
 <template>
-<Dashboard>
+    <Dashboard>
         <Toast />
         <Head :title="'Đơn hàng ' + order.order_id" />
         <div>
@@ -19,7 +19,7 @@
                         <InfoField class="pb-8 pr-6 w-full lg:w-1/2" label="Phường/Xã" :info="order.ward" />
                         <InfoField class="pb-8 pr-6 w-full lg:w-1/2" label="Phương thức thanh toán" :info="order.payment_mode" />
                         <InfoField class="pb-8 pr-6 w-full lg:w-1/2" label="Tổng số lượng" :info="order.quantity" />
-                        <InfoField class="pb-8 pr-6 w-full lg:w-1/2" label="Tổng tiền" :info="order.total_price" />
+                        <InfoField class="pb-8 pr-6 w-full lg:w-1/2" label="Tổng tiền" :info="formatCurrency(order.total_price)" />
 
                         <SelectInputInertia v-model="form.status" :status="status" :order="order" class="pb-8 pr-6 w-full lg:w-1/2" />
                     </div>
@@ -96,6 +96,7 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
 import { ref } from 'vue';
+import formatCurrency from '@/helper/formatCurrency';
 
 
 const props = defineProps({

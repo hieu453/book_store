@@ -9,7 +9,7 @@
                     <Link :href="route('product.show', { slug: item.product.slug, id: item.product.id })" class="flex gap-6 items-center justify-between px-4">
                         <div class="flex items-center gap-x-2">
                             <img
-                                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                                :src="`http://localhost:8000/storage/product_images/product_${item.product.id}/${item.product.images[0].image_name}`"
                                 alt="product_image"
                                 class="w-20 rounded-lg"
                             >
@@ -20,7 +20,7 @@
                         </div>
                         <div>
                             <div class="space-x-2">
-                                <span class="text-xl">Giá: {{ item.price }}đ</span>
+                                <span class="text-xl">Giá: {{ formatCurrency(item.price) }}</span>
                             </div>
                         </div>
                     </Link>
@@ -35,6 +35,7 @@
 </template>
 
 <script setup>
+import formatCurrency from '@/helper/formatCurrency';
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 

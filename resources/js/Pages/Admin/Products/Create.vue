@@ -1,9 +1,9 @@
 <template>
     <Dashboard>
-        <Head title="Create Category" />
+        <Head title="Tạo sản phẩm" />
         <h1 class="mb-8 text-3xl font-bold">
-            <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.products')">Products</Link>
-            <span class="text-indigo-400 font-medium">/</span> Create
+            <Link class="text-indigo-400 hover:text-indigo-600" :href="route('admin.products')">Sản phẩm</Link>
+            <span class="text-indigo-400 font-medium">/</span> Tạo
         </h1>
         <div class="max-w-3xl bg-white rounded-md shadow overflow-hidden">
             <form @submit.prevent="store">
@@ -24,10 +24,18 @@
                         label="Số lượng" />
                     <NumberInputInertia v-model="form.price" :error="errors.price" step="0.01" class="pb-8 pr-6 w-full lg:w-1/2"
                         label="Giá" />
+                    <NumberInputInertia v-model="form.new_price" :error="errors.new_price" step="0.01" class="pb-8 pr-6 w-full lg:w-1/2"
+                        label="Giá tiền mới" />
                     <TextInputInertia v-model="form.publisher" :error="errors.publisher" class="pb-8 pr-6 w-full lg:w-1/2"
                         label="Nhà xuất bản" />
                     <TextInputInertia v-model="form.published_date" :error="errors.published_date" type="date" class="pb-8 pr-6 w-full lg:w-1/2"
                         label="Ngày xuất bản" />
+
+                    <div class="pb-8 pr-6 w-full lg:w-1/2">
+                        <label class="form-label">Mô tả</label>
+                        <Textarea v-model="form.description" @input="form.description.trim()" class="flex-auto" autocomplete="off" />
+                        <div v-if="errors.description" class="form-error"></div>
+                    </div>
 
                     <!-- can dong thanh component -->
                     <div class="pb-8 pr-6 w-full lg:w-1/2">
@@ -62,6 +70,7 @@ import { useToast } from "primevue/usetoast";
 import TextInputInertia from '@/Components/TextInputInertia.vue';
 import NumberInputInertia from '@/Components/NumberInputInertia.vue';
 import LoadingButton from '@/Components/LoadingButton.vue';
+import { Textarea } from 'primevue';
 
 defineProps({
     errors: Object,
@@ -77,7 +86,9 @@ const form = useForm({
     weight: null,
     price: null,
     quantity: null,
+    description: null,
     publisher: null,
+    new_price: null,
     category_id: null,
     images: null,
     published_date: null,
