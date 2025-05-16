@@ -30,7 +30,7 @@
                                 </h1>
                                 <input type="date" v-model="created_at" class="font-normal rounded" @change="filter">
                             </th>
-                            <th class="pb-4 pt-6 px-6" colspan="2">
+                            <th class="pb-4 pt-6 px-6">
                                 <h1>
                                     Sửa lúc
                                 </h1>
@@ -49,19 +49,19 @@
                                 >
                             </td>
                             <td class="border-t">
-                            <Link class="flex items-center px-6 py-4 focus:text-indigo-500" :href="route('admin.categories.edit', { categoryId: category.id })">
-                                {{ category.name }}
-                            </Link>
+                                <Link class="flex items-center px-6 py-4 focus:text-indigo-500" :href="route('admin.categories.edit', { categoryId: category.id })">
+                                    {{ category.name }}
+                                </Link>
                             </td>
                             <td class="border-t">
-                            <Link class="flex items-center px-6 py-4" :href="route('admin.categories.edit', { categoryId: category.id })" tabindex="-1">
-                                {{ formatTimestamp(category.created_at) }}
-                            </Link>
+                                <Link class="flex items-center px-6 py-4" :href="route('admin.categories.edit', { categoryId: category.id })" tabindex="-1">
+                                    {{ formatTimestamp(category.created_at) }}
+                                </Link>
                             </td>
                             <td class="border-t">
-                            <Link class="flex items-center px-6 py-4" :href="route('admin.categories.edit', { categoryId: category.id })" tabindex="-1">
-                                {{ formatTimestamp(category.updated_at) }}
-                            </Link>
+                                <Link class="flex items-center px-6 py-4" :href="route('admin.categories.edit', { categoryId: category.id })" tabindex="-1">
+                                    {{ formatTimestamp(category.updated_at) }}
+                                </Link>
                             </td>
                         </tr>
                         <tr v-if="categories.data.length === 0">
