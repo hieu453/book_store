@@ -16,10 +16,25 @@ use Intervention\Image\Drivers\Imagick\Driver;
 
 class AdminProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $products = Product::when($request->name, function ($query, $name) {
+                                $query->where('name', 'LIKE', "%{$name}%");
+                            })
+                            ->when($request->author, function ($query, $author) {
+                                $query->where('author', 'LIKE', "%{$author}%");
+                            })
+                            ->when($request->language, function ($query, $language) {
+                                $query->where('language', 'LIKE', "%{$language}%");
+                            })
+                            ->when($request->publisher, function ($query, $publisher) {
+                                $query->where('publisher', 'LIKE', "%{$publisher}%");
+                            })
+                            ->paginate(5)->withQueryString();
+
         return Inertia::render('Admin/Products/Index', [
-            'products' => Product::paginate(5),
+            'products' => $products,
+            'filters' => $request->only(['name', 'author', 'language', 'publisher']),
         ]);
     }
 

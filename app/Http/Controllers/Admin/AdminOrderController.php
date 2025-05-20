@@ -5,28 +5,85 @@ namespace App\Http\Controllers\Admin;
 use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use App\Models\CancelledOrder;
 use App\Mail\UpdateOrderStatus;
 use Illuminate\Validation\Rule;
-use App\Helpers\Payment\Environment;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
 use App\Notifications\UpdateOrderStatusNotification;
 
 class AdminOrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $orders = Order::when($request->orderId, function ($query, $orderId) {
+                            $query->where('order_id', 'LIKE', "%{$orderId}%");
+                        })
+                        ->when($request->transId, function ($query, $transId) {
+                            $query->where('trans_id', 'LIKE', "%{$transId}%");
+                        })
+                        ->when($request->name, function ($query, $name) {
+                            $query->where('name', 'LIKE', "%{$name}%");
+                        })
+                        ->when($request->email, function ($query, $email) {
+                            $query->where('email', 'LIKE', "%{$email}%");
+                        })
+                        ->when($request->phoneNumber, function ($query, $phoneNumber) {
+                            $query->where('phone_number', 'LIKE', "%{$phoneNumber}%");
+                        })
+                        ->when($request->status, function ($query, $status) {
+                            $query->where('status', $status);
+                        })
+                        ->when($request->city, function ($query, $city) {
+                            $query->where('city', 'LIKE', "%{$city}%");
+                        })
+                        ->when($request->district, function ($query, $district) {
+                            $query->where('district', 'LIKE', "%{$district}%");
+                        })
+                        ->when($request->ward, function ($query, $ward) {
+                            $query->where('ward', 'LIKE', "%{$ward}%");
+                        })
+                        ->when($request->paymentMode, function ($query, $paymentMode) {
+                            $query->where('payment_mode', 'LIKE', "%{$paymentMode}%");
+                        })
+                        ->paginate(5)->withQueryString();
+
         return Inertia::render('Admin/Orders/Index', [
-            'orders' => Order::all(),
+            'orders' => $orders,
+            'filters' => $request->only([
+                'orderId',
+                'transId',
+                'status',
+                'name',
+                'email',
+                'phoneNumber',
+                'city',
+                'district',
+                'ward',
+                'quantity',
+                'totalPrice',
+                'paymentMethod'
+            ])
         ]);
     }
 
-    public function edit($orderId)
+    public function edit($orderId, Request $request)
     {
+        $order = Order::where('order_id', $orderId)->first();
+        $orderProducts = OrderItem::with('product')->where('order_id', $order->order_id)
+                        ->when($request->productName, function ($query, $productName) {
+                            $query->whereRelation('product', 'name', 'LIKE', "%{$productName}%");
+                        })
+                        ->paginate(2);
+
         return Inertia::render('Admin/Orders/Edit', [
-            'order' => Order::with('orderItems.product')->where('order_id', $orderId)->first(),
+            'order' => $order,
+            'orderProducts' => $orderProducts,
+            'filters' => $request->only([
+                'name',
+            ])
         ]);
     }
 

@@ -39,46 +39,52 @@
             </div>
             <h2 class="mt-12 text-2xl font-bold">Sản phẩm trong đơn hàng</h2>
             <div class="mt-6 bg-white rounded shadow overflow-x-auto">
-                <DataTable
-                    :value="order.order_items"
-                    v-model:filters="filters"
-                    filterDisplay="row"
-                    :globalFilterFields="['product.name']"
-                    sortMode="multiple"
-                    paginator
-                    :rows="5"
-                    tableStyle="min-width: 50rem"
-                    selectionMode="single"
-                >
-                    <Column field="product.name" header="Tên sản phẩm" style="min-width: 12rem">
-                        <template #body="{data}">
-                            {{ data.product.name }}
-                        </template>
-                        <template #filter="{filterModel, filterCallback}">
-                            <InputText v-model="filterModel.value" type="text" @input="filterCallback()"
-                                placeholder="Tìm theo tên sản phẩm" />
-                        </template>
-                    </Column>
-                    <Column field="quantity" header="Số lượng" style="min-width: 12rem">
-                        <template #body="{data}">
-                            {{ data.quantity }}
-                        </template>
-                        <template #filter="{filterModel, filterCallback}">
-                            <InputText v-model="filterModel.value" type="text" @input="filterCallback()"
-                                placeholder="Tìm theo số lượng" />
-                        </template>
-                    </Column>
-                    <Column field="price" header="Giá tiền" style="min-width: 12rem">
-                        <template #body="{data}">
-                            {{ data.price }}
-                        </template>
-                        <template #filter="{filterModel, filterCallback}">
-                            <InputText v-model="filterModel.value" type="text" @input="filterCallback()"
-                                placeholder="Tìm theo giá" />
-                        </template>
-                    </Column>
-                </DataTable>
+                <table class="w-full whitespace-nowrap">
+                    <thead>
+                        <tr class="text-left">
+                            <th class="pb-4 pt-6 px-6">
+                                <h1>
+                                    Tên sản phẩm
+                                </h1>
+                                <input type="text" v-model="productName" class="font-normal rounded" @input="filter">
+                            </th>
+                            <th class="pb-4 pt-6 px-6">
+                                <h1>
+                                    Số lượng
+                                </h1>
+                            </th>
+                            <th class="pb-4 pt-6 px-6">
+                                <h1>
+                                    Giá tiền
+                                </h1>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in orderProducts.data" :key="item.product.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                            <td class="border-t">
+                                <Link class="flex items-center px-6 py-4 focus:text-indigo-500" :href="route('admin.products.edit', { productId: item.product.id })">
+                                    {{ item.product.name }}
+                                </Link>
+                            </td>
+                            <td class="border-t">
+                                <Link class="flex items-center px-6 py-4" :href="route('admin.products.edit', { productId: item.product.id })" tabindex="-1">
+                                    {{ item.quantity }}
+                                </Link>
+                            </td>
+                            <td class="border-t">
+                                <Link class="flex items-center px-6 py-4" :href="route('admin.products.edit', { productId: item.product.id })" tabindex="-1">
+                                    {{ formatCurrency(item.price) }}
+                                </Link>
+                            </td>
+                        </tr>
+                        <tr v-if="orderProducts.data.length === 0">
+                            <td class="px-6 py-4 border-t" colspan="4">Không tìm thấy sản phẩm nào.</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
+            <Pagination :links="orderProducts.links" class="mt-2" />
         </div>
     </Dashboard>
 </template>
@@ -86,10 +92,7 @@
 <script setup>
 import LoadingButton from '@/Components/LoadingButton.vue';
 import InfoField from '@/Components/InfoField.vue';
-import DataTable from 'primevue/datatable';
 import { FilterMatchMode } from '@primevue/core/api';
-import InputText from 'primevue/inputtext';
-import Column from 'primevue/column';
 import SelectInputInertia from '@/Components/SelectInputInertia.vue';
 import Dashboard from '@/Layouts/Admin/Dashboard.vue';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
@@ -97,22 +100,20 @@ import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
 import { ref } from 'vue';
 import formatCurrency from '@/helper/formatCurrency';
-
+import Pagination from '@/Components/Pagination.vue';
+import { debounce } from 'lodash';
 
 const props = defineProps({
     order: Object,
+    orderProducts: Object,
     errors: Object,
+    filters: Object,
 })
+
 
 const form = useForm({
     status: props.order.status,
 })
-
-const filters = ref({
-    'product.name': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-    'quantity': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-    'price': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-});
 
 const status = ref({
     'pending': 'Chờ xác nhận',
@@ -123,6 +124,16 @@ const status = ref({
 
 const page = usePage();
 const toast = useToast();
+const productName = ref(props.filters.name ?? '');
+
+const filter = debounce(function () {
+    router.get(route('admin.orders.edit', { orderId: props.order.order_id }), {
+        productName: productName.value
+    }, {
+        preserveScroll: true,
+        preserveState: true,
+    })
+}, 250)
 
 function update() {
     router.put(route('admin.orders.update', { orderId: props.order.order_id }), form, {
