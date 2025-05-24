@@ -105,7 +105,10 @@ const filter = debounce(function () {
         Object.entries(data).filter(([_, v]) => v != '')
     )
 
-    router.get(route('admin.products'), filteredObject);
+    router.get(route('admin.products'), filteredObject, {
+        preserveScroll: true,
+        preserveState: true,
+    });
 }, 250)
 
 </script>

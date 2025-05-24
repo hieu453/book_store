@@ -11,10 +11,26 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminUserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $users = User::when($request->name, function ($query, $name) {
+                        $query->where('name', 'LIKE', "%{$name}%");
+                    })
+                    ->when($request->email, function ($query, $email) {
+                        $query->where('email', 'LIKE', "%{$email}%");
+                    })
+                    ->when($request->has('role'), function ($query) use ($request) {
+                        $query->where('is_admin', $request->role);
+                    })
+                    ->paginate(3)->withQueryString();
+
         return Inertia::render('Admin/Users/Index', [
-            'users' => User::all(),
+            'users' => $users,
+            'filters' => $request->only([
+                'name',
+                'email',
+                'role',
+            ])
         ]);
     }
 
@@ -29,12 +45,14 @@ class AdminUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => 'required',
         ]);
 
         User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'is_admin' => $request->role,
         ]);
         return to_route('admin.users')->with('success', "Đã tạo người dùng có tên {$request->name}");
     }
@@ -49,12 +67,17 @@ class AdminUserController extends Controller
 
     public function update(int $userId, Request $request)
     {
-        $validatedData = $request->validate([
+        $request->validate([
             'name' => ['required'],
             'email' => ['required', 'email'],
+            'role' => ['required'],
         ]);
 
-        User::find($userId)->update($validatedData);
+        $user = User::find($userId);
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->is_admin = $request->role;
+        $user->save();
 
         return back();
     }

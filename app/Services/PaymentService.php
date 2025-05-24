@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Constants\ResultCode;
+use LDAP\Result;
 
 class PaymentService
 {
@@ -40,6 +41,12 @@ class PaymentService
                 ];
             case ResultCode::WRONG_FORMAT:
                 return 'Wrong format';
+            case ResultCode::TRANSACTION_DENIED:
+                return [
+                    'message' => 'Bạn đã hủy giao dịch',
+                    'icon' => asset('status_icons/cancel_icon.svg'),
+                    'code' => ResultCode::TRANSACTION_DENIED,
+                ];
             default:
                 return 'Có lỗi xảy ra';
         }

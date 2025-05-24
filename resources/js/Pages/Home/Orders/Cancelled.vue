@@ -35,6 +35,7 @@
 </template>
 
 <script setup>
+import formatCurrency from '@/helper/formatCurrency';
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 

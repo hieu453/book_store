@@ -11,43 +11,58 @@
                 </Link>
             </div>
             <div class="bg-white rounded-md shadow overflow-x-auto">
-                <DataTable :value="users" v-model:selection="selectedUsers"
-                    v-model:filters="filters" filterDisplay="row" dataKey="id" sortMode="multiple" paginator :rows="5"
-                    tableStyle="min-width: 50rem" selectionMode="single" @rowSelect="onRowSelect">
-                    <template #empty> Chưa có người dùng nào. </template>
-
-                    <Column field="name" header="Tên người dùng" style="min-width: 12rem">
-                        <template #body="{data}">
-                            {{ data.name }}
-                        </template>
-                        <template #filter="{filterModel, filterCallback}">
-                            <InputText v-model="filterModel.value" type="text" @input="filterCallback()"
-                                placeholder="Tìm theo tên người dùng" />
-                        </template>
-                    </Column>
-                    <Column field="email" header="Email" style="min-width: 12rem">
-                        <template #body="{data}">
-                            {{ data.email }}
-                        </template>
-                        <template #filter="{filterModel, filterCallback}">
-                            <InputText v-model="filterModel.value" type="text" @input="filterCallback()"
-                                placeholder="Tìm theo email người dùng" />
-                        </template>
-                    </Column>
-                    <Column field="is_admin" header="Vai trò" :showFilterMenu="false" style="min-width: 12rem">
-                        <template #body="{ data }">
-                            <Tag :value="getRole(data.is_admin)" />
-                        </template>
-                        <template #filter="{ filterModel, filterCallback }">
-                            <Select v-model="filterModel.value" @change="filterCallback()" class="border" :options="roles" placeholder="Chọn" style="min-width: 12rem" :showClear="true">
-                                <template #option="slotProps">
-                                    <Tag :value="(slotProps.option)" />
-                                </template>
-                            </Select>
-                        </template>
-                    </Column>
-                </DataTable>
+                <table class="w-full whitespace-nowrap">
+                    <thead>
+                        <tr class="text-left">
+                            <th class="pb-4 pt-6 px-6">
+                                <h1>
+                                    Tên người dùng
+                                </h1>
+                                <input type="text" v-model="name" class="font-normal rounded" @input="filter">
+                            </th>
+                            <th class="pb-4 pt-6 px-6">
+                                <h1>
+                                    Email
+                                </h1>
+                                <input type="text" v-model="email" class="font-normal rounded" @input="filter">
+                            </th>
+                            <th class="pb-4 pt-6 px-6">
+                                <h1>
+                                    Vai trò
+                                </h1>
+                                <select class="font-normal rounded" v-model="role" @change="filter">
+                                    <option value=""></option>
+                                    <option value="1">Quản trị viên</option>
+                                    <option value="0">Khách hàng</option>
+                                </select>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="user in users.data" :key="user.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
+                            <td class="border-t">
+                                <Link class="flex items-center px-6 py-4 focus:text-indigo-500" :href="route('admin.users.edit', { userId: user.id })">
+                                    {{ user.name }}
+                                </Link>
+                            </td>
+                            <td class="border-t">
+                                <Link class="flex items-center px-6 py-4" :href="route('admin.users.edit', { userId: user.id })" tabindex="-1">
+                                    {{ user.email }}
+                                </Link>
+                            </td>
+                            <td class="border-t">
+                                <Link class="flex items-center px-6 py-4" :href="route('admin.users.edit', { userId: user.id })" tabindex="-1">
+                                    {{ getRole(user.is_admin) }}
+                                </Link>
+                            </td>
+                        </tr>
+                        <tr v-if="users.data.length === 0">
+                            <td class="px-6 py-4 border-t" colspan="4">Không tìm thấy danh mục nào.</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
+            <Pagination :links="users.links" class="mt-2" />
         </div>
     </Dashboard>
 </template>
@@ -55,41 +70,42 @@
 import Dashboard from '@/Layouts/Admin/Dashboard.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import { FilterMatchMode } from '@primevue/core/api';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
 import Toast from 'primevue/toast';
-import Tag from 'primevue/tag';
-import InputText from 'primevue/inputtext';
-import Select from 'primevue/select';
+import Pagination from '@/Components/Pagination.vue';
+import { debounce } from 'lodash';
 
-defineProps({
+const props = defineProps({
     users: Object,
+    filters: Object,
 })
 
-const selectedUsers = ref()
-
-const filters = ref({
-    name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-    email: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-    is_admin: { value: null, matchMode: FilterMatchMode.EQUALS },
-});
-
-const roles = ref([
-    0,
-    1
-])
+const name = ref(props.filters.name ?? '')
+const email = ref(props.filters.email ?? '')
+const role = ref(props.filters.role ?? '')
 
 function getRole(role) {
     switch (role) {
         case 0:
-            return 'user (0)'
+            return 'Khách hàng';
         case 1:
-            return 'admin (1)'
+            return 'Quản trị viên';
     }
 }
 
-function onRowSelect(event) {
-    router.get(route('admin.users.edit', { userId: event.data.id }))
-}
+const filter = debounce(function () {
+    const data = {
+        name: name.value,
+        email: email.value,
+        role: role.value,
+    }
+
+    const filteredObject = Object.fromEntries(
+        Object.entries(data).filter(([_, v]) => v != '')
+    )
+
+    router.get(route('admin.users'), filteredObject, {
+        preserveScroll: true,
+        preserveState: true,
+    });
+}, 250)
 </script>

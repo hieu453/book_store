@@ -51,6 +51,19 @@
                                 <InputError class="mt-2" :message="form.errors.email" />
                             </div>
 
+                            <div>
+                                <InputLabel for="email" value="Email" />
+
+                                <div class="mt-1 block w-full">
+                                    <select v-model="form.role" class="rounded border-gray-300 shadow-sm">
+                                        <option value="0">Khách hàng</option>
+                                        <option value="1">Quản trị viên</option>
+                                    </select>
+                                </div>
+
+                                <InputError class="mt-2" :message="form.errors.email" />
+                            </div>
+
                             <div class="flex items-center gap-4">
                                 <PrimaryButton :disabled="form.processing">Lưu</PrimaryButton>
 
@@ -134,6 +147,7 @@ const toast = useToast();
 const form = useForm({
     name: props.user.name,
     email: props.user.email,
+    role: props.user.is_admin,
 })
 const showModal = ref(false)
 const processingDelete = ref(false);

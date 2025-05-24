@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\Payment\Environment;
+use App\Helpers\Payment\Momo;
 use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Order;
@@ -110,21 +112,60 @@ class AdminOrderController extends Controller
         return back()->with('success', 'Đã cập nhật đơn hàng.');
     }
 
-    public function showCancelledOrder()
+    public function delete($orderId)
     {
+        Order::destroy($orderId);
+
+        return to_route('admin.orders')->with('success', 'Đã xóa đơn hàng.');
+    }
+
+    public function showCancelledOrder(Request $request)
+    {
+        $cancelledOrders = CancelledOrder::with('user')
+                            ->when($request->orderId, function ($query, $orderId) {
+                                $query->where('order_id', 'LIKE', "%{$orderId}%");
+                            })
+                            ->when($request->name, function ($query, $name) {
+                                $query->whereRelation('user', 'name', 'LIKE', "%{$name}%");
+                            })
+                            ->paginate(5);
+
         return Inertia::render('Admin/CancelledOrders/Index', [
-            'cancelledOrders' => CancelledOrder::with('user')->get(),
+            'cancelledOrders' => $cancelledOrders,
+            'filters' => $request->only([
+                'name',
+                'orderId',
+            ]),
+            'cancelledOrdersLength' => CancelledOrder::count(),
         ]);
+    }
+
+    public function checkAll(Request $request)
+    {
+        if ($request->selectAll) {
+            return response()->json(['selectedOrderIds' => CancelledOrder::all()->pluck('order_id')]);
+        }
+
+        return response()->json(['selectedOrderIds' => []]);
     }
 
     public function cancelOrders(Request $request)
     {
-        $orders = Order::whereIn('order_id', $request->order_ids)->get();
+        $orders = Order::whereIn('order_id', $request->orderIds)->get();
         foreach ($orders as $order) {
-            $order->status = 'cancelled';
-            $order->save();
+            if ($order->payment_mode === 'cod') {
+                $order->status = 'cancelled';
+                $order->save();
+                CancelledOrder::where('order_id', $order->order_id)->delete();
+            }
 
-            $order->cancelledOrder()->update(['status' => 'cancelled']);
+            if ($order->payment_mode === 'online') {
+                Momo::refund(new Environment, $order->order_id, $order->request_id, $order->total_price, $order->trans_id);
+
+                $order->status = 'cancelled';
+                $order->save();
+                CancelledOrder::where('order_id', $order->order_id)->delete();
+            }
         }
 
         return back()->with('success', 'Đã hủy các đơn hàng');

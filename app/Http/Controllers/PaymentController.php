@@ -236,7 +236,6 @@ class PaymentController extends Controller
                 // gui email cho user mua hang
                 Mail::to($request->user())->queue(new OrderSuccess($order));
             }
-
             $handledResult = $this->payment->handlePaymentStatusCode($paymentDetails['resultCode']);
 
             if (! is_array($handledResult)) {

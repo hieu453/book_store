@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CancelledOrder;
+use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use App\Models\CancelledOrder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\CancelOrderNotification;
 
 class OrderController extends Controller
 {
@@ -29,8 +32,10 @@ class OrderController extends Controller
             $cancelledOrder->save();
 
             //Can send email and notification below
+            $admins = User::where('is_admin', 1)->get();
+            Notification::send($admins, new CancelOrderNotification($cancelledOrder));
 
-            return back()->with('success', 'You sent a cancelled order request');
+            return back()->with('success', 'Bạn đã gửi yêu cầu hủy đơn hàng.');
         }
 
         return back()->with('error', 'There are some wrong');

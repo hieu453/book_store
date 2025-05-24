@@ -24,6 +24,18 @@
                     <TextInputInertia v-model="form.password_confirmation" type="password" :error="errors.password_confirmation" class="pb-8 pr-6 w-full lg:w-1/2"
                         label="Xác nhận mật khẩu" />
                 </div>
+
+                <div class="flex flex-wrap -mb-8 -mr-6 p-4">
+                    <div class="pb-8 pr-6 w-full lg:w-1/2">
+                        <label class="form-label">Vai trò</label>
+                        <select class="rounded" v-model="form.role">
+                            <option value="0">Khách hàng</option>
+                            <option value="1">Quản trị viên</option>
+                        </select>
+                        <div v-if="errors.role" class="form-error">{{ role }}</div>
+                    </div>
+                </div>
+
                 <div class="flex items-center justify-end px-8 py-4 bg-gray-50 border-t border-gray-100">
                     <LoadingButton :loading="form.processing" class="btn-indigo" type="submit">Tạo danh mục</LoadingButton>
                 </div>
@@ -40,7 +52,6 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
 
-
 defineProps({
     errors: Object
 })
@@ -51,6 +62,7 @@ const toast = useToast()
 const form = useForm({
     name: '',
     email: '',
+    role: 0,
     password: '',
     password_confirmation: '',
 })

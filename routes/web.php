@@ -26,6 +26,8 @@ use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Mail\UpdateOrderStatus;
+use App\Models\CancelledOrder;
+use App\Notifications\CancelOrderNotification;
 
 // dev routes
 Route::get('/session-flush', function () {
@@ -33,9 +35,10 @@ Route::get('/session-flush', function () {
     return redirect()->back();
 });
 
-Route::get('/mailable', function () {
-    $order = Order::find(1746947854);
-    return new UpdateOrderStatus($order);
+Route::get('/notification', function () {
+    $cancelledOrder = CancelledOrder::find(14);
+    return (new CancelOrderNotification($cancelledOrder))
+            ->toMail($cancelledOrder->user);
 });
 
 Route::get('/test2', function (Request $request) {
@@ -134,9 +137,11 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->group(function () {
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('admin.orders');
     Route::get('/orders/{orderId}/edit', [AdminOrderController::class, 'edit'])->name('admin.orders.edit');
     Route::put('/orders/{orderId}/update', [AdminOrderController::class, 'update'])->name('admin.orders.update');
+    Route::delete('/orders/{orderId}/delete}', [AdminOrderController::class, 'delete'])->name('admin.orders.delete');
     // Cancelled orders
     Route::get('/cancelled-orders', [AdminOrderController::class, 'showCancelledOrder'])->name('admin.orders.cancelled');
     Route::post('/cancelled-orders', [AdminOrderController::class, 'cancelOrders'])->name('admin.orders.cancel');
+    Route::post('/cancelled-orders/check-all', [AdminOrderController::class, 'checkAll'])->name('admin.orders.cancelled.check.all');
 
     // Admin notifications
     // Notification routes

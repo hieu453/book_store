@@ -84,7 +84,7 @@
                             :disabled="product.quantity == 0"
                             :class="[ product.quantity == 0 ? 'opacity-50' : '', 'w-12 text-center rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' ]">
                     </div>
-                    <div class="sm:flex sm:space-x-4 sm:mb-6">
+                    <div class="sm:flex sm:space-x-4 sm:mb-6 md:justify-start">
                         <Toast />
                         <button
                             :disabled="disabled"
@@ -98,7 +98,7 @@
                             </svg>
                             Thêm vào giỏ hàng
                         </button>
-                        <div class="flex mb-6 sm:mb-0 gap-4 justify-between">
+                        <div class="flex mb-6 sm:mb-0 gap-4 justify-between md:flex-1">
                             <button
                                 :disabled="disabled"
                                 @click="buyNow"
@@ -114,7 +114,7 @@
                             <button
                                 :disabled="disabled"
                                 @click="addToWishlist"
-                                class="bg-gray-200 flex justify-center items-center gap-2 text-gray-800 rounded-md px-4 py-2 sm:px-6 sm:py-0 hover:bg-gray-300 focus:outline-none focus:ring-2 disabled:cursor-not-allowed focus:ring-gray-500 focus:ring-offset-2">
+                                class="bg-gray-200 flex w-full justify-center items-center gap-2 text-gray-800 rounded-md px-4 py-2 sm:px-6 sm:py-0 hover:bg-gray-300 focus:outline-none focus:ring-2 disabled:cursor-not-allowed focus:ring-gray-500 focus:ring-offset-2">
                                 <svg v-if="initialInWishlist" xmlns="http://www.w3.org/2000/svg" fill="true" viewBox="0 0 24 24" stroke-width="1.5"
                                     stroke="currentColor" class="size-6">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -140,9 +140,10 @@
                 <Review :product="product" />
             </div>
 
-            <div class="mt-4">
+            <div v-if="relatedProducts.length > 0" class="mt-4">
                 <h1 class="text-xl font-bold">Có thể bạn sẽ thích</h1>
                 <Swiper
+                    :pagination="true"
                     :slidesPerView="1"
                     :spaceBetween="30"
                     :breakpoints="{
@@ -166,7 +167,7 @@
                                 <img v-else src="" alt="product image" style="height: 300px; width: 100%;">
                             </template>
                             <template #subtitle>
-                                <div class="line-clamp-2 has-tooltip">
+                                <div class="line-clamp-1 has-tooltip">
                                     <h1>
                                         {{ product.name }}
                                     </h1>
@@ -214,11 +215,9 @@ import { FreeMode, Navigation, Pagination, Thumbs } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/free-mode';
 import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 import 'swiper/css/thumbs';
 import formatCurrency from '@/helper/formatCurrency';
-
-// Dayjs
-import dayjs from 'dayjs';
 
 const props = defineProps({
     product: Object,
@@ -254,7 +253,6 @@ const totalStars = computed(() => {
 
     return total / props.product.reviews.length;
 })
-
 
 
 // khoi tao gia tri cho 1 san pham (de user thay doi so luong se thay doi theo)

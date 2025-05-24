@@ -37,9 +37,6 @@ const props = defineProps({
     orders: Array,
 })
 
-console.log(props.orders);
-
-
 const tabs = {
     'Chờ xác nhận': Pending,
     'Đang xử lý': Processing,

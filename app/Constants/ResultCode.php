@@ -17,4 +17,6 @@ class ResultCode
     public const DUPLICATE_ORDER_ID = 41;
 
     public const TRANSACTION_CANCEL = 1002;
+
+    public const TRANSACTION_DENIED = 1006;
 }

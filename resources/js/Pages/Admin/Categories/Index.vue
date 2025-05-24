@@ -6,8 +6,8 @@
             <h1 class="mb-8 text-3xl font-bold">Danh mục</h1>
             <div class="flex items-center justify-between mb-6">
                 <Link class="btn-indigo" :href="route('admin.categories.create')">
-                <span>Tạo</span>
-                <span class="hidden md:inline">&nbsp;Danh mục</span>
+                    <span>Tạo</span>
+                    <span class="hidden md:inline">&nbsp;Danh mục</span>
                 </Link>
             </div>
 
@@ -15,9 +15,9 @@
                 <table class="w-full whitespace-nowrap">
                     <thead>
                         <tr class="text-left">
-                            <th class="pb-4 pt-6 px-4">
+                            <!-- <th class="pb-4 pt-6 px-4">
                                 <input type="checkbox" v-model="selectAll" @change="checkAll">
-                            </th>
+                            </th> -->
                             <th class="pb-4 pt-6 px-6">
                                 <h1>
                                     Tên danh mục
@@ -40,14 +40,14 @@
                     </thead>
                     <tbody>
                         <tr v-for="category in categories.data" :key="category.id" class="hover:bg-gray-100 focus-within:bg-gray-100">
-                            <td class="border-t px-4">
+                            <!-- <td class="border-t px-4">
                                 <input type="checkbox"
                                     v-model="selectedIds"
                                     :checked="selectedIds.includes(category.id)"
                                     :value="category.id"
                                     @change="select"
                                 >
-                            </td>
+                            </td> -->
                             <td class="border-t">
                                 <Link class="flex items-center px-6 py-4 focus:text-indigo-500" :href="route('admin.categories.edit', { categoryId: category.id })">
                                     {{ category.name }}
@@ -65,7 +65,7 @@
                             </td>
                         </tr>
                         <tr v-if="categories.data.length === 0">
-                            <td class="px-6 py-4 border-t" colspan="4">No categorys found.</td>
+                            <td class="px-6 py-4 border-t" colspan="4">Không tìm thấy danh mục nào.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -94,34 +94,34 @@ const created_at = ref(props.filters.created_at ?? '');
 const updated_at = ref(props.filters.updated_at ?? '')
 
 // Xu ly select checkbox
-const selectedIds = ref(JSON.parse(localStorage.getItem('selectedIds')) ?? [])
-const selectAll = ref(selectedIds.value.length === props.categoriesLength ? true : false)
+// const selectedIds = ref(JSON.parse(localStorage.getItem('selectedIds')) ?? [])
+// const selectAll = ref(selectedIds.value.length === props.categoriesLength ? true : false)
 
-async function checkAll() {
-    if (selectAll.value) {
-        props.categories.data.forEach(category => {
-            if (!selectedIds.value.includes(category.id)) {
-                selectedIds.value.push(category.id)
-            }
-        })
-    } else {
-        props.categories.data.forEach(category => {
-            if (selectedIds.value.includes(category.id)) {
-                const index = selectedIds.value.indexOf(category.id)
-                selectedIds.value.splice(index, 1)
-            }
-        })
-    }
+// async function checkAll() {
+//     if (selectAll.value) {
+//         props.categories.data.forEach(category => {
+//             if (!selectedIds.value.includes(category.id)) {
+//                 selectedIds.value.push(category.id)
+//             }
+//         })
+//     } else {
+//         props.categories.data.forEach(category => {
+//             if (selectedIds.value.includes(category.id)) {
+//                 const index = selectedIds.value.indexOf(category.id)
+//                 selectedIds.value.splice(index, 1)
+//             }
+//         })
+//     }
 
-    const res = await axios.post(route('admin.categories.check.all'), { selectAll: selectAll.value })
-    selectedIds.value = res.data.selectedIds
-    localStorage.setItem('selectedIds', JSON.stringify(selectedIds.value))
-}
+//     const res = await axios.post(route('admin.categories.check.all'), { selectAll: selectAll.value })
+//     selectedIds.value = res.data.selectedIds
+//     localStorage.setItem('selectedIds', JSON.stringify(selectedIds.value))
+// }
 
-function select() {
-    localStorage.setItem('selectedIds', JSON.stringify(selectedIds.value))
-    selectAll.value = selectedIds.value.length === props.categoriesLength ? true : false
-}
+// function select() {
+//     localStorage.setItem('selectedIds', JSON.stringify(selectedIds.value))
+//     selectAll.value = selectedIds.value.length === props.categoriesLength ? true : false
+// }
 // Ket thuc xu ly checkbox
 
 const filter = debounce(function () {
@@ -135,7 +135,10 @@ const filter = debounce(function () {
         Object.entries(data).filter(([_, v]) => v != '')
     )
 
-    router.get(route('admin.categories'), filteredObject);
+    router.get(route('admin.categories'), filteredObject, {
+        preserveScroll: true,
+        preserveState: true,
+    });
 }, 250)
 
 function formatTimestamp(timestamp) {

@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('order_id');
             $table->unsignedBigInteger('user_id');
-            $table->enum('status', ['processing', 'cancelled'])->default('processing');
             $table->timestamps();
         });
     }

@@ -24,14 +24,14 @@
                         <SelectInputInertia v-model="form.status" :status="status" :order="order" class="pb-8 pr-6 w-full lg:w-1/2" />
                     </div>
                     <div class="flex items-center px-8 py-4 bg-gray-50 border-t border-gray-100">
-                        <!-- <button
+                        <button
                             class="text-red-600 hover:underline"
                             tabindex="-1"
                             type="button"
                             @click="destroy"
                         >
-                            Delete Order
-                        </button> -->
+                            Xóa đơn hàng
+                        </button>
                         <LoadingButton :loading="form.processing" class="btn-indigo ml-auto" type="submit">Cập nhật
                             đơn hàng</LoadingButton>
                     </div>
@@ -92,7 +92,6 @@
 <script setup>
 import LoadingButton from '@/Components/LoadingButton.vue';
 import InfoField from '@/Components/InfoField.vue';
-import { FilterMatchMode } from '@primevue/core/api';
 import SelectInputInertia from '@/Components/SelectInputInertia.vue';
 import Dashboard from '@/Layouts/Admin/Dashboard.vue';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
@@ -109,7 +108,6 @@ const props = defineProps({
     errors: Object,
     filters: Object,
 })
-
 
 const form = useForm({
     status: props.order.status,
@@ -141,5 +139,13 @@ function update() {
             toast.add({ severity: 'success', summary: page.props.flash.success, life: 2000 })
         }
     })
+}
+
+function destroy() {
+    router.delete(route('admin.orders.delete', { orderId: props.order.order_id }), {
+        onSuccess: () => {
+            toast.add({ severity: 'success', summary: page.props.flash.success, life: 2000 })
+        }
+    });
 }
 </script>

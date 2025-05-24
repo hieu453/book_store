@@ -44,7 +44,9 @@
                                                 <div class="">
                                                     <h1 class="text-left font-semibold">
                                                         {{ notification.data.message }} {{ notification.data.order_id }}
-                                                        {{ notification.data.order_status }}
+                                                        <template v-if="notification.data.order_status">
+                                                            {{ notification.data.order_status }}
+                                                        </template>
                                                     </h1>
                                                     <p class="text-left">{{ dayjs(notification.created_at).locale('vi').fromNow() }}</p>
                                                 </div>
